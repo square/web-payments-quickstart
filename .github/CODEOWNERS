@@ -1,0 +1,7 @@
+# CODEOWNERS syntax https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners#codeowners-syntax
+#
+# Code owners are automatically requested for review when someone opens a pull request that modifies code that they own.
+# Code owners are not automatically requested to review draft pull requests
+# When you mark a draft pull request as ready for review, code owners are automatically notified.
+
+* @maxbeatty
