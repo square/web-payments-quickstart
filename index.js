@@ -57,7 +57,7 @@ async function createPayment(req) {
   return { success: true };
 }
 
-// server static files like index.html and favicon.ico from public/ directory
+// serve static files like index.html and favicon.ico from public/ directory
 async function serveStatic(req, res) {
   logger.debug('Handling request', req.path);
   await staticHandler(req, res, {

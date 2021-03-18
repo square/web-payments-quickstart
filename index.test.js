@@ -1,6 +1,10 @@
+// ava is a test runner for Node.js that isolates tests
 const test = require('ava');
+// micro is a minimal http framework (what's run by `npm start`)
 const micro = require('micro');
+// test-listen creates URLs with ephimeral ports ideal for isolated tests
 const listen = require('test-listen');
+// node-fetch brings window.fetch to Node.js
 const fetch = require('node-fetch');
 
 const main = require('.');
