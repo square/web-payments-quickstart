@@ -1,16 +1,20 @@
 {
-  "name": "@square/tpl-oss-js",
+  "name": "@square/web-payments-quickstart",
   "version": "1.0.0",
-  "description": "Template for new JavaScript open source projects",
+  "description": "Quickstart for using Square's Web Payments SDK",
   "main": "index.js",
+  "private": true,
   "scripts": {
+    "start": "NODE_ENV=production micro --listen tcp://0.0.0.0:${PORT-3000}",
+    "inspect": "node --inspect node_modules/.bin/micro-dev",
+    "dev": "micro-dev",
     "prepare": "husky install",
     "lint": "npm-run-all --serial lint:*",
     "lint:eslint": "eslint --ignore-path .gitignore --cache .",
     "lint:prettier": "prettier --ignore-path .gitignore --check .",
     "lint:prettier:fix": "prettier --ignore-path .gitignore --write .",
     "test": "npm-run-all --serial lint test:*",
-    "test:unit": "echo '🔜'"
+    "test:unit": "nyc ava"
   },
   "repository": {
     "type": "git",
@@ -25,27 +29,50 @@
     "url": "https://github.com/square/tpl-oss-js/issues"
   },
   "homepage": "https://github.com/square/tpl-oss-js#readme",
+  "dependencies": {
+    "ajv": "^7.2.1",
+    "async-retry": "^1.3.1",
+    "debug": "^4.3.1",
+    "dotenv": "^8.2.0",
+    "micro": "^9.3.4",
+    "microrouter": "^3.1.3",
+    "nanoid": "^3.1.21",
+    "serve-handler": "^6.1.3",
+    "square": "^9.0.0"
+  },
   "devDependencies": {
     "@square/prettier-config": "^1.0.0",
-    "eslint": "^7.21.0",
+    "ava": "^3.15.0",
+    "eslint": "^7.22.0",
+    "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-square": "^17.0.0",
     "husky": "^5.1.3",
     "lint-staged": "^10.5.4",
+    "micro-dev": "^3.0.0",
+    "node-fetch": "^2.6.1",
     "npm-run-all": "^4.1.5",
-    "prettier": "^2.2.1"
+    "nyc": "^15.1.0",
+    "prettier": "^2.2.1",
+    "test-listen": "^1.1.0"
   },
   "prettier": "@square/prettier-config",
   "eslintConfig": {
+    "env": {
+      "browser": true,
+      "node": true
+    },
     "plugins": [
-      "square"
+      "square",
+      "ava"
     ],
     "extends": [
-      "plugin:square/typescript"
+      "plugin:square/base",
+      "plugin:ava/recommended"
     ]
   },
   "lint-staged": {
     "*.js": "eslint --cache --fix",
-    "*.{json,md,yml}": "prettier --write"
+    "*.{html,json,md,yml}": "prettier --write"
   }
 }

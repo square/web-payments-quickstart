@@ -1,39 +1,28 @@
-# tpl-oss-js
+# Web Payments Quickstart
 
 [![LICENSE](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://github.com/square/tpl-oss-js/blob/main/LICENSE)
+[![CI](https://github.com/square/web-payments-quickstart/actions/workflows/ci.yml/badge.svg)](https://github.com/square/web-payments-quickstart/actions/workflows/ci.yml)
 
-Template for new JavaScript open source projects. [Learn how to create your new repository](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-from-a-template).
+Quickstart for using Square's Web Payments SDK
 
-## What's included
+## Getting Started
 
-This template includes some basics for starting a new JavaScript project to help you save time and effort. It has some opinions, but not many.
+```sh
+# clone this repository from GitHub
+git clone https://github.com/square/web-payments-quickstart
+# enter project
+cd web-payments-quickstart
+# install dependencies
+npm install
+# start development server
+npm run dev
+```
 
-- [x] Documentation: README, LICENSE, Code of Conduct, Contributing, Security, Support
-- [x] GitHub templates for Issues and Pull Requests with code owners
-- [x] Bootstrapped `package.json` and `index.js`
-- [x] Linting via ESLint and Prettier
-- [x] Pre-commit hooks
-- [x] GitHub Actions CI workflow
-- [ ] Test framework (e.g. runner, code coverage, etc.)
-- [ ] Build tools (e.g. TypeScript, esbuild, webpack, etc.)
-- [ ] Conventional Commits or commit linting
-- [ ] Semantic Releases or other package management workflows
-
-## Launching
-
-[Your pre-launch checklist](https://opensource.guide/starting-a-project/#your-pre-launch-checklist) and more on [Open Source Guides](https://opensource.guide/)
-
-### Resources for better READMEs
-
-- [Make a README](https://www.makeareadme.com/)
-- [Making READMEs Readable](https://github.com/18F/open-source-guide/blob/18f-pages/pages/making-readmes-readable.md)
-- [README Template](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
-
----
+Finally, open [http://localhost:3000](http://localhost:3000)
 
 ## Development
 
-### Getting Started
+### Setup
 
 This project uses Node v15 as defined by `.nvmrc` to take advantage of npm@7. You can use [nvm](https://github.com/nvm-sh/nvm) to install the correct version:
 
