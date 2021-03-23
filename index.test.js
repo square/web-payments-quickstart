@@ -55,7 +55,7 @@ test('createPayment tries to create payment with valid payload', async (t) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       amount: 100,
-      locationId: '🌉',
+      locationId: 'LKYXSPGPXK05M',
       sourceId: 't0k3n',
     }),
   });

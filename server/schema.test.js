@@ -6,7 +6,7 @@ test('validatePaymentPayload returns true if valid payload', (t) => {
   t.true(
     schema.validatePaymentPayload({
       amount: 100,
-      locationId: '🌉',
+      locationId: 'LKYXSPGPXK05M',
       sourceId: 't0k3n',
     })
   );
@@ -16,7 +16,7 @@ test('validatePaymentPayload returns false if invalid amount', (t) => {
   t.false(
     schema.validatePaymentPayload({
       amount: '$2.34',
-      locationId: '🌉',
+      locationId: 'LKYXSPGPXK05M',
       sourceId: 't0k3n',
     })
   );
@@ -25,7 +25,7 @@ test('validatePaymentPayload returns false if invalid amount', (t) => {
 test('validatePaymentPayload returns false if incomplete payload', (t) => {
   t.false(
     schema.validatePaymentPayload({
-      locationId: '🌉',
+      locationId: 'LKYXSPGPXK05M',
       sourceId: 't0k3n',
     })
   );
