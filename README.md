@@ -12,6 +12,10 @@ Quickstart for using Square's Web Payments SDK
 git clone https://github.com/square/web-payments-quickstart
 # enter project
 cd web-payments-quickstart
+# install the correct Node version
+nvm install $(cat .nvmrc)
+# use that Node version
+nvm use
 # install dependencies
 npm install
 # start development server
