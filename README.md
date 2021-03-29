@@ -13,7 +13,7 @@ git clone https://github.com/square/web-payments-quickstart
 # enter project
 cd web-payments-quickstart
 # install the correct Node version
-nvm install $(cat .nvmrc)
+nvm install
 # use that Node version
 nvm use
 # install dependencies
