@@ -56,6 +56,7 @@
   },
   "prettier": "@square/prettier-config",
   "eslintConfig": {
+    "root": true,
     "env": {
       "browser": true,
       "node": true
@@ -71,11 +72,12 @@
     "overrides": [
       {
         "files": [
-          "public"
+          "public/*"
         ],
         "rules": {
-          "import/extentions": [
-            "off"
+          "import/extensions": [
+            "error",
+            "always"
           ]
         }
       }

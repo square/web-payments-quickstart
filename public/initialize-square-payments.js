@@ -37,12 +37,15 @@ export function initializeSquarePayments(env) {
   const squarePromise = new Promise((resolve, reject) => {
     script.onload = async () => {
       if (!window.Square) {
-        console.error('Something went wrong loading the Square Payments SDK');
-        reject();
+        const e = new Error(
+          'Something went wrong loading the Square Payments SDK'
+        );
+        console.error(e);
+        reject(e);
         return;
       }
-
       console.log('Loading the Square Payments SDK script complete');
+
       console.log('Initialize Square.payments()');
       const payments = await window.Square.payments(
         credential[env].appId,
