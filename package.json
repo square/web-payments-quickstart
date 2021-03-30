@@ -67,6 +67,18 @@
     "extends": [
       "plugin:square/base",
       "plugin:ava/recommended"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "public"
+        ],
+        "rules": {
+          "import/extentions": [
+            "off"
+          ]
+        }
+      }
     ]
   },
   "lint-staged": {
