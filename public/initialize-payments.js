@@ -68,7 +68,7 @@ export default async function initializePayments() {
       // The first of these promises to resolve successfully will provide a tokenResult we can use to create a payment
       const tokenResult = await Promise.race(
         // Only bind payment methods we've succesfully instantiated
-        paymentMethodBindings.map(
+        paymentMethods.map(
           ({ paymentMethod, methodName, event, triggerSelector }) => {
             // Helper function for mapping payment methods to event listeners
             return bindPaymentMethodToTrigger(paymentMethod, {
