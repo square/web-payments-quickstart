@@ -1,5 +1,5 @@
 import { initializeSquarePayments } from './initialize-square-payments.js';
-import { initializeCard } from './payment-methods/card.js';
+import { bindCardToTrigger, initializeCard } from './payment-methods/card.js';
 import { initializeGooglePay } from './payment-methods/google-pay.js';
 import createPayment from './services/create-payment.js';
 import configurePaymentRequest from './payment-methods/configure-payment-request.js';
@@ -26,9 +26,8 @@ export default async function initializePayments() {
     });
 
     // Data we'll need to bind our payment method to a trigger
-    paymentMethodBindings.push({
-      paymentMethod: card,
-      methodName: 'Card', // TMP until we add a property to payment methods
+    // Returns a promise that resolves when the buyer triggers the event.
+    const tokenResult = bindCardToTrigger(card, {
       event: CLICK,
       triggerSelector: cardTrigger,
     });
