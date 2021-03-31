@@ -1,5 +1,5 @@
 // micro provides http helpers
-const { createError, json } = require('micro');
+const { json } = require('micro');
 // microrouter provides http server routing
 const { router, get, post } = require('microrouter');
 // serve-handler serves static assets
@@ -12,16 +12,16 @@ const retry = require('async-retry');
 // logger gives us insight into what's happening
 const logger = require('./server/logger');
 // schema validates incoming requests
-const { validatePaymentPayload } = require('./server/schema');
+// const { validatePaymentPayload } = require('./server/schema');
 // square provides the API client and error types
 const { ApiError, client: square } = require('./server/square');
 
 async function createPayment(req) {
   const payload = await json(req);
 
-  if (!validatePaymentPayload(payload)) {
-    throw createError(400, 'Bad Request');
-  }
+  // if (!validatePaymentPayload(payload)) {
+  //   throw createError(400, 'Bad Request');
+  // }
 
   // See: https://developer.squareup.com/docs/working-with-apis/idempotency
   const idempotencyKey = nanoid();
@@ -32,12 +32,9 @@ async function createPayment(req) {
 
       const { result, statusCode } = await square.paymentsApi.createPayment({
         idempotencyKey,
-        amountMoney: {
-          amount: payload.amount,
-          currency: 'USD', // IDEA: multiple currencies
-        },
+        amountMoney: payload.amountMoney,
         locationId: payload.locationId,
-        sourceId: payload.sourceId,
+        sourceId: payload.token,
       });
 
       logger.info('Payment succeeded!', { result, statusCode });
