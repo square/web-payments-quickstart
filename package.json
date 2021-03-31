@@ -8,7 +8,6 @@
     "start": "NODE_ENV=production micro --listen tcp://0.0.0.0:${PORT-3000}",
     "inspect": "node --inspect node_modules/.bin/micro-dev",
     "dev": "micro-dev",
-    "prepare": "husky install",
     "lint": "npm-run-all --serial lint:*",
     "lint:eslint": "eslint --ignore-path .gitignore --cache .",
     "lint:prettier": "prettier --ignore-path .gitignore --check .",
@@ -18,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/square/tpl-oss-js.git"
+    "url": "git+https://github.com/square/square/web-payments-quickstart.git"
   },
   "keywords": [
     "template"
@@ -26,9 +25,9 @@
   "author": "",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/square/tpl-oss-js/issues"
+    "url": "https://github.com/square/web-payments-quickstart/issues"
   },
-  "homepage": "https://github.com/square/tpl-oss-js#readme",
+  "homepage": "https://github.com/square/web-payments-quickstart#readme",
   "dependencies": {
     "ajv": "^7.2.1",
     "async-retry": "^1.3.1",
@@ -47,7 +46,7 @@
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-square": "^17.0.0",
-    "husky": "^5.1.3",
+    "husky": "^4.3.8",
     "lint-staged": "^10.5.4",
     "micro-dev": "^3.0.0",
     "node-fetch": "^2.6.1",
@@ -70,6 +69,11 @@
       "plugin:square/base",
       "plugin:ava/recommended"
     ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
   "lint-staged": {
     "*.js": "eslint --cache --fix",
