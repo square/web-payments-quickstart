@@ -1,9 +1,4 @@
-async function initializeSquarePayments(Square, { applicationId, locationId }) {
-  const payments = await Square.payments(applicationId, locationId);
-  return payments;
-}
-
-function loadSquarePayments(env) {
+function loadSquarePayments(env, locationId) {
   // TODO: Make this function idempotent.
 
   // Checkpoint 1.1 -  loading the SDK.
@@ -23,7 +18,6 @@ function loadSquarePayments(env) {
   const credential = {
     sandbox: {
       appId: 'sandbox-sq0idb-lybe_WkfKNAbb3WklswmwA',
-      locationId: 'LKYXSPGPXK05M',
     },
     production: {
       // Add your production credentials here
@@ -52,10 +46,10 @@ function loadSquarePayments(env) {
       console.log('Loading the Square Payments SDK script complete');
 
       console.log('Initialize Square.payments()');
-      const payments = await initializeSquarePayments(window.Square.payments, {
-        applicationId: credential[env].appId,
-        locationId: credential[env].locationId,
-      });
+      const payments = await window.Square.payments(
+        credential[env].appId,
+        locationId
+      );
       console.log('Initialize Square.payments() complete');
 
       resolve(payments);
@@ -68,4 +62,4 @@ function loadSquarePayments(env) {
   return squarePromise;
 }
 
-export { loadSquarePayments, initializeSquarePayments };
+export { loadSquarePayments };

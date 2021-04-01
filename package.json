@@ -72,7 +72,7 @@
     "overrides": [
       {
         "files": [
-          "public/*"
+          "public/**/*"
         ],
         "rules": {
           "import/extensions": [

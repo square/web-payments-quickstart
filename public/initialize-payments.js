@@ -1,106 +1,78 @@
-import { initializeSquarePayments } from './initialize-square-payments.js';
-import { bindCardToTrigger, initializeCard } from './payment-methods/card.js';
-import { initializeGooglePay } from './payment-methods/google-pay.js';
-import createPayment from './services/create-payment.js';
-import configurePaymentRequest from './payment-methods/configure-payment-request.js';
-import bindPaymentMethodToTrigger from './payment-methods/bind-payment-method-to-trigger.js';
+import { loadSquarePayments } from './load-square-payments.js';
+import {
+  createDeferredCardPayment,
+  initializeCard,
+} from './payment-methods/card.js';
+import { uuidV4 } from './services/uuid-v4.js';
 
-const CLICK = 'click';
+const intent = {
+  CHARGE: 'CHARGE',
+  STORE: 'STORE',
+};
+const locationId = 'LKYXSPGPXK05M';
+// These can also be found on your Order if you've created one already
+const amount = '1.00';
+const currencyCode = 'USD';
 
 export default async function initializePayments() {
-  // Checkpoint 1: Can we load the script?
-  // Test: payments object is initialized without error
-  const payments = await initializeSquarePayments('sandbox');
+  const paymentDetails = {
+    intent: intent.CHARGE,
+    amount,
+    currencyCode,
+    locationId,
+    // See: https://developer.squareup.com/docs/working-with-apis/idempotency
+    idempotencyKey: uuidV4(),
+  };
 
-  // Checkpoint 2: initialize a payment method
+  // Collection of successfully initialized Payment sources
+  const paymentMethods = [];
+  const payments = await loadSquarePayments('sandbox', locationId);
+
   console.log('Initialize payment methods');
-  // Our list of successfully initialized payment methods, and the data we'll need to bind them each to their trigger
-  const paymentMethodBindings = [];
   try {
-    // The Card Payment Method has a different target than trigger, usually a submit button
     const cardTarget = '#card-target';
-    const cardTrigger = '#card-submit-button';
     const card = await initializeCard({
       payments,
       targetElementOrSelector: cardTarget,
     });
 
-    // Data we'll need to bind our payment method to a trigger
-    // Returns a promise that resolves when the buyer triggers the event.
-    const tokenResult = bindCardToTrigger(card, {
-      event: CLICK,
-      triggerSelector: cardTrigger,
-    });
+    // Add a deferred card payment to our collection
+    paymentMethods.push(
+      createDeferredCardPayment(payments, card, paymentDetails)
+    );
+    // TODO: We need to re-bind this event in the case that our payment fails
   } catch (e) {
     console.error('Initializing Card failed', e);
   }
 
   // PaymentRequest can be re-used across Apple Pay and Google Pay
-  const paymentRequest = configurePaymentRequest(payments);
+  // const paymentRequest = configurePaymentRequest(payments);
+  // try {
+  //   // Digital Wallets Buttons use the same element for both target and trigger
+  //   const googlePayTargetAndTrigger = '#google-pay-target';
+  //   const googlePay = await initializeGooglePay({
+  //     payments,
+  //     paymentRequest,
+  //     targetElementOrSelector: googlePayTargetAndTrigger,
+  //   });
+  // } catch (e) {
+  //   console.error('Initializing Google Pay failed', e);
+  // }
+
+  return deferredPayment(paymentMethods);
+}
+
+async function deferredPayment(paymentMethods) {
   try {
-    // Digital Wallets Buttons use the same element for both target and trigger
-    const googlePayTargetAndTrigger = '#gpay-target';
-    const googlePay = await initializeGooglePay({
-      payments,
-      paymentRequest,
-      targetElementOrSelector: googlePayTargetAndTrigger,
-    });
+    // We can use promise.race to get the first successful payment
+    const completedPayment = await Promise.race(paymentMethods);
 
-    // Data we'll need to bind our payment method to a trigger
-    paymentMethodBindings.push({
-      paymentMethod: googlePay,
-      methodName: 'Google Pay', // TMP until we add a property to payment methods
-      event: CLICK,
-      triggerSelector: googlePayTargetAndTrigger,
-    });
+    console.log('Payment Succeeded', completedPayment);
+
+    return completedPayment;
   } catch (e) {
-    console.error('Initializing Google Pay failed', e);
-  }
-
-  let paymentComplete = false;
-  // Bind and re-bind our payment methods to their event listeners until payment succeeds
-  // We use { once: true } in our .addEventListener call to avoid duplicating events
-  while (!paymentComplete) {
-    // This error handler is not intended to handle errors, but instead allows us to catch ignore them.
-    // This allows the buyer to make another attempt to create a payment and avoids breaking the page.
-    try {
-      // The first of these promises to resolve successfully will provide a tokenResult we can use to create a payment
-      const tokenResult = await Promise.race(
-        // Only bind payment methods we've succesfully instantiated
-        paymentMethods.map(
-          ({ paymentMethod, methodName, event, triggerSelector }) => {
-            // Helper function for mapping payment methods to event listeners
-            return bindPaymentMethodToTrigger(paymentMethod, {
-              methodName, // Temporary until we add a property to payment methods
-              event,
-              triggerSelector,
-            });
-          }
-        )
-      );
-
-      console.log(
-        'Attempting to Create Payment using TokenResult',
-        tokenResult
-      );
-      // Call our create payment helper to POST our tokenResult to the server
-      const payment = await createPayment(tokenResult);
-
-      // Check if the payment is successful
-      if (payment.status === 'OK') {
-        // End while-loop
-        paymentComplete = true;
-      }
-    } catch (e) {
-      // If something goes wrong while binding, tokenizing, or creating a payment
-      // Log the result to your error logger.
-      // Allow the buyer to try again by rebinding trigger events without changing the page.
-      // This allows the buyer to retry without needing to re-enter any manually provided payment information.
-      console.error(
-        'Something went wrong while attempting to tokenize and create payment',
-        e
-      );
-    }
+    console.error('Payment Failed', e);
+    throw e;
   }
 }
 

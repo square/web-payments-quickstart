@@ -1,5 +1,50 @@
-#card-target {
-  max-width: 600px;
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Square Market', Arial, sans-serif;
+}
+
+#card-form {
+  max-width: 485px;
   min-width: 300px;
   margin: 0 auto;
+}
+
+#card-target {
+  margin-top: 20px;
+  /* this height depends on the container size of the target element */
+  /* We transition from a single row to double row at 485px */
+  /* Settting this min-height minimizes the impact of the card form loading */
+  min-height: 90px;
+}
+
+@media screen and (max-width: 500px) {
+  #card-target {
+    min-height: 140px;
+  }
+}
+
+label {
+  font-size: 12px;
+  width: 100%;
+}
+
+input {
+  padding: 12px;
+  width: 100%;
+  border-radius: 5px;
+  border-width: 1px;
+  margin-top: 5px;
+}
+
+button {
+  border-radius: 5px;
+  cursor: pointer;
+  border-style: none;
+  outline: none;
+  padding: 12px;
+  width: 100%;
+  box-shadow: 1px;
 }
