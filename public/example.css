@@ -6,10 +6,15 @@ body {
   font-family: 'Square Market', Arial, sans-serif;
 }
 
-#card-form {
+.payment-form {
   max-width: 485px;
   min-width: 300px;
-  margin: 0 auto;
+  margin: 150px auto;
+}
+
+.card-inputs {
+  display: flex;
+  justify-content: space-between;
 }
 
 #card-target {

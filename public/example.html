@@ -5,34 +5,40 @@
     <link href="example.css" rel="stylesheet" />
   </head>
   <body>
-    <div id="google-pay-target"></div>
+    <div class="payment-form">
+      <div id="google-pay-target"></div>
 
-    <form id="card-form">
-      <div class="card-inputs">
-        <label for="given-name-input">Given Name</label>
-        <input
-          id="given-name-input"
-          type="text"
-          aria-required="true"
-          required="required"
-          placeholder="Given Name"
-          name="givenName"
-        />
+      <form id="card-form">
+        <div class="card-inputs">
+          <div class="input-group">
+            <label for="given-name-input">Given Name</label>
+            <input
+              id="given-name-input"
+              type="text"
+              aria-required="true"
+              required="required"
+              placeholder="Given Name"
+              name="givenName"
+            />
+          </div>
 
-        <label for="family-name-input">Family Name</label>
-        <input
-          id="family-name-input"
-          type="text"
-          aria-required="true"
-          required="required"
-          placeholder="Family Name"
-          name="familyName"
-        />
-      </div>
+          <div class="input-group">
+            <label for="family-name-input">Family Name</label>
+            <input
+              id="family-name-input"
+              type="text"
+              aria-required="true"
+              required="required"
+              placeholder="Family Name"
+              name="familyName"
+            />
+          </div>
+        </div>
 
-      <div id="card-target"></div>
+        <div id="card-target"></div>
 
-      <button type="submit">Pay $1.00</button>
-    </form>
+        <button type="submit">Pay $1.00</button>
+      </form>
+    </div>
   </body>
 </html>

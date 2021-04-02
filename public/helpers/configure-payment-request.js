@@ -12,7 +12,6 @@ export default function configurePaymentRequest(
     },
   });
 
-  // Checkpoint xxx: handle shipping contact changed
   paymentRequest.addEventListener(
     'shippingcontactchanged',
     (contact, update) => {
@@ -25,7 +24,6 @@ export default function configurePaymentRequest(
     }
   );
 
-  // Checkpoint: handle shipping option changed
   paymentRequest.addEventListener('shippingoptionchanged', (option, update) => {
     // Add your business logic here.
     // This tells you the shipping options selected by the buyer, and allows you to update
