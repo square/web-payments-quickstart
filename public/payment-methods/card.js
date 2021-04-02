@@ -26,40 +26,6 @@ async function initializeCard({ payments, targetElementOrSelector }) {
   return card;
 }
 
-async function verifyBuyer(
-  payments,
-  {
-    token, // To force a verification challenge in the Sandbox, set the token to cnon:card-nonce-requires-verification.
-    intent = 'CHARGE', // or 'STORE'
-    billingContact, // { givenName, familyName }
-    amount, // Only required for charge
-    currencyCode, // Only required for charge
-  }
-) {
-  console.debug('Verifying Buyer');
-  const detailsToVerify = {
-    intent,
-    billingContact,
-  };
-
-  try {
-    if (intent === 'CHARGE') {
-      detailsToVerify.amount = amount;
-      detailsToVerify.currencyCode = currencyCode;
-    }
-    // token = 'cnon:card-nonce-requires-verification';
-    const verificationDetails = await payments.verifyBuyer(
-      token,
-      detailsToVerify
-    );
-    console.debug('Successfully Verified Buyer', verificationDetails);
-
-    return verificationDetails;
-  } catch (e) {
-    console.error('Buyer Verification Failed', e);
-    return false;
-  }
-}
 // Call this function to tokenize the card, verify the buyer, and create a payment.
 async function createCardPayment(
   card,
@@ -71,8 +37,7 @@ async function createCardPayment(
   const tokenResult = await card.tokenize();
 
   if (tokenResult.status === 'OK') {
-    const verificationDetails = await verifyBuyer(payments, {
-      token: tokenResult.token,
+    const verificationDetails = await payments.verifyBuyer(tokenResult.token, {
       intent,
       billingContact,
       amount,
