@@ -1,6 +1,6 @@
 import { loadSquarePayments } from './load-square-payments.js';
 import {
-  createDeferredCardPayment,
+  createCardPaymentOnFormSubmit,
   initializeCard,
 } from './payment-methods/card.js';
 import {
@@ -49,7 +49,7 @@ export default async function initializePayments() {
 
     // Add a deferred card payment to our collection
     paymentMethods.push(
-      createDeferredCardPayment(payments, card, paymentDetails)
+      createCardPaymentOnFormSubmit(payments, card, paymentDetails)
     );
   } catch (e) {
     console.error('Initializing Card failed', e);

@@ -1,9 +1,7 @@
 import createPayment from '../services/create-payment.js';
 
-// pass in payments rather than initializing for each payment method
+// Initialize and Attach a card.
 async function initializeCard({ payments, targetElementOrSelector }) {
-  // Card can be customized here.
-  console.debug('Initialize Card');
   // The Card field can also be customized with card.configure(...)
   // https://developer.squareup.com/reference/sdks/web/payments/card-payments#Card.configure
   const card = await payments.card({
@@ -23,22 +21,9 @@ async function initializeCard({ payments, targetElementOrSelector }) {
   });
 
   // This is the part you'd repeat in your component every time it loads
-  console.debug('Attach Card');
   await card.attach(targetElementOrSelector);
 
   return card;
-}
-
-function getBillingContact(form) {
-  const formData = new FormData(form);
-  // I18n/L10n Note: separate Given and Family name fields allow the buyer to share their name accurately.
-  // We don't want to make incorrect assumptions on where to split their full name.
-  const billingContact = {
-    givenName: formData.get('givenName'),
-    familyName: formData.get('familyName'),
-  };
-
-  return billingContact;
 }
 
 async function verifyBuyer(
@@ -75,7 +60,7 @@ async function verifyBuyer(
     return false;
   }
 }
-
+// Call this function to tokenize the card, verify the buyer, and create a payment.
 async function createCardPayment(
   card,
   payments,
@@ -113,7 +98,19 @@ async function createCardPayment(
   return false;
 }
 
-function createDeferredCardPayment(payments, card, paymentDetails) {
+function getBillingContact(form) {
+  const formData = new FormData(form);
+  // I18n/L10n Note: separate Given and Family name fields allow the buyer to share their name accurately.
+  // We don't want to make incorrect assumptions on where to split their full name.
+  const billingContact = {
+    givenName: formData.get('givenName'),
+    familyName: formData.get('familyName'),
+  };
+
+  return billingContact;
+}
+
+function createCardPaymentOnFormSubmit(payments, card, paymentDetails) {
   const cardForm = document.querySelector('#card-form');
   const event = 'submit';
   return new Promise((resolve) => {
@@ -141,4 +138,4 @@ function createDeferredCardPayment(payments, card, paymentDetails) {
     });
   });
 }
-export { initializeCard, createDeferredCardPayment };
+export { initializeCard, createCardPaymentOnFormSubmit };
