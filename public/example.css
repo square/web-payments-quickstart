@@ -17,16 +17,16 @@ body {
   justify-content: space-between;
 }
 
-#card-target {
+#card-container {
   margin-top: 20px;
-  /* this height depends on the container size of the target element */
+  /* this height depends on the size of the container element */
   /* We transition from a single row to double row at 485px */
   /* Settting this min-height minimizes the impact of the card form loading */
   min-height: 90px;
 }
 
 @media screen and (max-width: 500px) {
-  #card-target {
+  #card-container {
     min-height: 140px;
   }
 }

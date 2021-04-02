@@ -11,7 +11,7 @@ async function createDeferredapplePayPayment(
   applePay,
   { locationId, idempotencyKey }
 ) {
-  const applePayTrigger = document.querySelector('#apple-pay-target');
+  const applePayTrigger = document.querySelector('#apple-pay-container');
   const event = 'click';
 
   let paymentComplete = false;

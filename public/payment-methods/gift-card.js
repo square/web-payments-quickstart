@@ -2,7 +2,7 @@ import createPayment from '../services/create-payment.js';
 import deferredEvent from '../helpers/deferred-event.js';
 
 // pass in payments rather than initializing for each payment method
-async function initializeGiftCard({ payments, targetElementOrSelector }) {
+async function initializeGiftCard({ payments, containerElementOrSelector }) {
   // GiftCard can be customized here.
   console.debug('Initialize GiftCard');
   // The GiftCard field can also be customized with card.configure(...)
@@ -25,7 +25,7 @@ async function initializeGiftCard({ payments, targetElementOrSelector }) {
 
   try {
     console.debug('Attach GiftCard');
-    await giftCard.attach(targetElementOrSelector);
+    await giftCard.attach(containerElementOrSelector);
   } catch (e) {
     console.error('Something went wrong attaching GiftCard', e);
   }

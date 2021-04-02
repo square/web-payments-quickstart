@@ -3,14 +3,14 @@ import createPayment from '../services/create-payment.js';
 async function initializeGooglePay({
   payments,
   paymentRequest,
-  targetElementOrSelector,
+  containerElementOrSelector,
 }) {
   console.debug('Initialize Google Pay');
   // Show Google Pay customization options
   const googlePay = await payments.googlePay(paymentRequest);
   try {
     console.debug('Attach Google Pay');
-    await googlePay.attach(targetElementOrSelector);
+    await googlePay.attach(containerElementOrSelector);
   } catch (e) {
     console.error('Something went wrong attaching Google Pay', e);
   }
@@ -42,7 +42,7 @@ async function createGooglePayPayment(
 }
 
 function createDeferredGooglePayPayment(googlePay, paymentDetails) {
-  const googlePayTrigger = document.querySelector('#google-pay-target');
+  const googlePayTrigger = document.querySelector('#google-pay-container');
   const event = 'click';
   return new Promise((resolve) => {
     googlePayTrigger.addEventListener(event, async (e) => {

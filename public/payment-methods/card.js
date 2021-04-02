@@ -1,7 +1,7 @@
 import createPayment from '../services/create-payment.js';
 
 // Initialize and Attach a card.
-async function initializeCard({ payments, targetElementOrSelector }) {
+async function initializeCard({ payments, containerElementOrSelector }) {
   // The Card field can also be customized with card.configure(...)
   // https://developer.squareup.com/reference/sdks/web/payments/card-payments#Card.configure
   const card = await payments.card({
@@ -21,7 +21,7 @@ async function initializeCard({ payments, targetElementOrSelector }) {
   });
 
   // This is the part you'd repeat in your component every time it loads
-  await card.attach(targetElementOrSelector);
+  await card.attach(containerElementOrSelector);
 
   return card;
 }
@@ -65,8 +65,6 @@ async function createCardPayment(
 
 function getBillingContact(form) {
   const formData = new FormData(form);
-  // I18n/L10n Note: separate Given and Family name fields allow the buyer to share their name accurately.
-  // We don't want to make incorrect assumptions on where to split their full name.
   const billingContact = {
     givenName: formData.get('givenName'),
     familyName: formData.get('familyName'),

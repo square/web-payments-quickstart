@@ -41,10 +41,10 @@ export default async function initializePayments() {
   // Payment Method: Card
   // ********************
   try {
-    const cardTarget = '#card-target';
+    const cardContainer = '#card-container';
     const card = await initializeCard({
       payments,
-      targetElementOrSelector: cardTarget,
+      containerElementOrSelector: cardContainer,
     });
 
     // Add a deferred card payment to our collection
@@ -65,12 +65,12 @@ export default async function initializePayments() {
   // Payment Method: Google Pay
   // **************************
   try {
-    // Digital Wallets Buttons use the same element for both target and trigger
-    const googlePayTargetAndTrigger = '#google-pay-target';
+    // Digital Wallets Buttons use the same element for both container and trigger
+    const googlePayContainerAndTrigger = '#google-pay-container';
     const googlePay = await initializeGooglePay({
       payments,
       paymentRequest,
-      targetElementOrSelector: googlePayTargetAndTrigger,
+      containerElementOrSelector: googlePayContainerAndTrigger,
     });
 
     paymentMethods.push(
