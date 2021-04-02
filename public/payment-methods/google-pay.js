@@ -6,6 +6,7 @@ async function initializeGooglePay({
   targetElementOrSelector,
 }) {
   console.debug('Initialize Google Pay');
+  // Show Google Pay customization options
   const googlePay = await payments.googlePay(paymentRequest);
   try {
     console.debug('Attach Google Pay');

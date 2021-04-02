@@ -23,12 +23,8 @@ async function initializeCard({ payments, targetElementOrSelector }) {
   });
 
   // This is the part you'd repeat in your component every time it loads
-  try {
-    console.debug('Attach Card');
-    await card.attach(targetElementOrSelector);
-  } catch (e) {
-    console.error('Something went wrong attaching Card', e);
-  }
+  console.debug('Attach Card');
+  await card.attach(targetElementOrSelector);
 
   return card;
 }
@@ -43,6 +39,41 @@ function getBillingContact(form) {
   };
 
   return billingContact;
+}
+
+async function verifyBuyer(
+  payments,
+  {
+    token, // To force a verification challenge in the Sandbox, set the token to cnon:card-nonce-requires-verification.
+    intent = 'CHARGE', // or 'STORE'
+    billingContact, // { givenName, familyName }
+    amount, // Only required for charge
+    currencyCode, // Only required for charge
+  }
+) {
+  console.debug('Verifying Buyer');
+  const detailsToVerify = {
+    intent,
+    billingContact,
+  };
+
+  try {
+    if (intent === 'CHARGE') {
+      detailsToVerify.amount = amount;
+      detailsToVerify.currencyCode = currencyCode;
+    }
+    // token = 'cnon:card-nonce-requires-verification';
+    const verificationDetails = await payments.verifyBuyer(
+      token,
+      detailsToVerify
+    );
+    console.debug('Successfully Verified Buyer', verificationDetails);
+
+    return verificationDetails;
+  } catch (e) {
+    console.error('Buyer Verification Failed', e);
+    return false;
+  }
 }
 
 async function createCardPayment(
@@ -110,40 +141,4 @@ function createDeferredCardPayment(payments, card, paymentDetails) {
     });
   });
 }
-
-async function verifyBuyer(
-  payments,
-  {
-    token, // To force a verification challenge in the Sandbox, set the token to cnon:card-nonce-requires-verification.
-    intent = 'CHARGE', // or 'STORE'
-    billingContact, // { givenName, familyName }
-    amount, // Only required for charge
-    currencyCode, // Only required for charge
-  }
-) {
-  console.debug('Verifying Buyer');
-  const detailsToVerify = {
-    intent,
-    billingContact,
-  };
-
-  try {
-    if (intent === 'CHARGE') {
-      detailsToVerify.amount = amount;
-      detailsToVerify.currencyCode = currencyCode;
-    }
-    // token = 'cnon:card-nonce-requires-verification';
-    const verificationDetails = await payments.verifyBuyer(
-      token,
-      detailsToVerify
-    );
-    console.debug('Successfully Verified Buyer', verificationDetails);
-
-    return verificationDetails;
-  } catch (e) {
-    console.error('Buyer Verification Failed', e);
-    return false;
-  }
-}
-
 export { initializeCard, createDeferredCardPayment };

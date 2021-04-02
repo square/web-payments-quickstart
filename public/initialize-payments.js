@@ -51,7 +51,6 @@ export default async function initializePayments() {
     paymentMethods.push(
       createDeferredCardPayment(payments, card, paymentDetails)
     );
-    // TODO: We need to re-bind this event in the case that our payment fails
   } catch (e) {
     console.error('Initializing Card failed', e);
   }
