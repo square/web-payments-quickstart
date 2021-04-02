@@ -43,20 +43,20 @@ function loadSquarePayments(env, locationId) {
         reject(e);
         return;
       }
-      console.log('Loading the Square Payments SDK script complete');
+      console.debug('Loading the Square Payments SDK script complete');
 
-      console.log('Initialize Square.payments()');
+      console.debug('Initialize Square.payments()');
       const payments = await window.Square.payments(
         credential[env].appId,
         locationId
       );
-      console.log('Initialize Square.payments() complete');
+      console.debug('Initialize Square.payments() complete');
 
       resolve(payments);
     };
   });
 
-  console.log('Loading the Square Payments SDK script');
+  console.debug('Loading the Square Payments SDK script');
   document.body.append(script);
 
   return squarePromise;

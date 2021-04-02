@@ -11,7 +11,7 @@ export default async function createPayment({
     idempotencyKey,
   });
 
-  console.log('POST to /payment', body);
+  console.debug('POST to /payment', JSON.parse(body));
   const createPaymentResponse = await fetch('/payment', {
     method: 'POST',
     headers: {
@@ -20,13 +20,13 @@ export default async function createPayment({
     body,
   })
     .then((response) => {
-      console.log(response);
+      console.debug(response);
       return response.json();
     })
     .catch((e) => {
       console.error('Something went wrong processing the payment', e);
     });
 
-  console.log('POST to /payment complete', createPaymentResponse);
+  console.debug('POST to /payment complete', createPaymentResponse);
   return createPaymentResponse;
 }

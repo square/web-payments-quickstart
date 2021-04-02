@@ -1,6 +1,16 @@
-export default function configurePaymentRequest(payments) {
+export default function configurePaymentRequest(
+  payments,
+  { amount, currencyCode, countryCode }
+) {
   // Checkpoint PaymentRequest: Create Payment Request
-  const paymentRequest = payments.paymentRequest({});
+  const paymentRequest = payments.paymentRequest({
+    currencyCode,
+    countryCode,
+    total: {
+      amount,
+      label: 'Total',
+    },
+  });
 
   // Checkpoint xxx: handle shipping contact changed
   paymentRequest.addEventListener(

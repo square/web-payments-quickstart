@@ -16,7 +16,7 @@ const { ApiError, client: square } = require('./server/square');
 
 async function createPayment(req, res) {
   const payload = await json(req);
-  console.log(JSON.stringify(payload));
+  console.debug(JSON.stringify(payload));
 
   // if (!validatePaymentPayload(payload)) {
   //   throw createError(400, 'Bad Request');
