@@ -10,17 +10,12 @@ const retry = require('async-retry');
 // logger gives us insight into what's happening
 const logger = require('./server/logger');
 // schema validates incoming requests
-// const { validatePaymentPayload } = require('./server/schema');
 // square provides the API client and error types
 const { ApiError, client: square } = require('./server/square');
 
 async function createPayment(req, res) {
   const payload = await json(req);
   console.debug(JSON.stringify(payload));
-
-  // if (!validatePaymentPayload(payload)) {
-  //   throw createError(400, 'Bad Request');
-  // }
 
   await retry(async (bail, attempt) => {
     try {

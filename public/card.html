@@ -1,31 +1,197 @@
-<form id="card-form">
-  <div class="card-inputs">
-    <div class="input-group">
-      <label for="given-name-input">Given Name</label>
-      <input
-        id="given-name-input"
-        type="text"
-        aria-required="true"
-        required="required"
-        placeholder="Given Name"
-        name="givenName"
-      />
-    </div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="app.css" rel="stylesheet" />
+    <script
+      type="text/javascript"
+      src="https://sandbox.web.squarecdn.com/v0/square.js"
+    ></script>
+    <script type="module">
+      const appId = 'sandbox-sq0idb-lybe_WkfKNAbb3WklswmwA';
+      const locationId = 'LKYXSPGPXK05M';
 
-    <div class="input-group">
-      <label for="family-name-input">Family Name</label>
-      <input
-        id="family-name-input"
-        type="text"
-        aria-required="true"
-        required="required"
-        placeholder="Family Name"
-        name="familyName"
-      />
-    </div>
-  </div>
+      function uuidV4() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
+          /[xy]/g,
+          function (c) {
+            const r = Math.trunc(Math.random() * 16),
+              v = c === 'x' ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+          }
+        );
+      }
 
-  <div id="card-container"></div>
+      async function createPayment({
+        tokenResult,
+        verificationDetails,
+        locationId,
+        idempotencyKey,
+      }) {
+        const body = JSON.stringify({
+          tokenResult,
+          verificationDetails,
+          locationId,
+          idempotencyKey,
+        });
 
-  <button type="submit">Pay $1.00</button>
-</form>
+        const createPaymentResponse = await fetch('/payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body,
+        })
+          .then((response) => {
+            return response.json();
+          })
+          .catch((e) => {
+            console.error('Something went wrong processing the payment', e);
+          });
+
+        return createPaymentResponse;
+      }
+
+      function getBillingContact(form) {
+        const formData = new FormData(form);
+        const billingContact = {
+          givenName: formData.get('givenName'),
+          familyName: formData.get('familyName'),
+        };
+
+        return billingContact;
+      }
+
+      // Call this function to tokenize the card, verify the buyer, and create a payment.
+      async function createCardPayment(
+        card,
+        payments,
+        billingContact,
+        { intent, locationId, idempotencyKey, amount, currencyCode }
+      ) {
+        // Tokenize Card
+        const tokenResult = await card.tokenize();
+
+        if (tokenResult.status === 'OK') {
+          const verificationDetails = await payments.verifyBuyer(
+            tokenResult.token,
+            {
+              intent,
+              billingContact,
+              amount,
+              currencyCode,
+            }
+          );
+
+          if (tokenResult && verificationDetails) {
+            const paymentResult = await createPayment({
+              tokenResult,
+              verificationDetails,
+              locationId,
+              idempotencyKey,
+            });
+
+            if (paymentResult) {
+              console.debug('Card Payment Complete', paymentResult);
+
+              return paymentResult;
+            }
+          }
+        }
+
+        return false;
+      }
+
+      function createCardPaymentOnFormSubmit(payments, card, paymentDetails) {
+        const cardForm = document.querySelector('#card-form');
+        const event = 'submit';
+        return new Promise((resolve) => {
+          cardForm.addEventListener(event, async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Get other data bound to form submission
+            const billingContact = getBillingContact(cardForm);
+
+            const paymentResult = await createCardPayment(
+              card,
+              payments,
+              billingContact,
+              paymentDetails
+            );
+
+            if (paymentResult) {
+              // disable form submission on success
+              const submitButton = cardForm.querySelector(
+                'button[type="submit"]'
+              );
+              submitButton.disabled = true;
+
+              resolve(paymentResult);
+            }
+          });
+        });
+      }
+
+      async function initializePayments(appId, locationId) {
+        try {
+          const payments = await window.Square.payments(appId, locationId);
+
+          const card = await payments.card();
+
+          const cardContainer = '#card-container';
+          await card.attach(cardContainer);
+
+          // TODO: payment details
+          const paymentDetails = {
+            intent: 'CHARGE',
+            amount: '1.00',
+            currencyCode: 'USD',
+            countryCode: 'US',
+            locationId,
+            // See: https://developer.squareup.com/docs/working-with-apis/idempotency
+            idempotencyKey: uuidV4(),
+          };
+          // TODO: create card payment
+          return createCardPaymentOnFormSubmit(payments, card, paymentDetails);
+        } catch (e) {
+          console.error('Initializing Card failed', e);
+        }
+      }
+
+      initializePayments(appId, locationId);
+    </script>
+  </head>
+  <body>
+    <form id="card-form" class="payment-form">
+      <div class="card-inputs">
+        <div class="input-group">
+          <label for="given-name-input">First Name</label>
+          <input
+            id="given-name-input"
+            type="text"
+            aria-required="true"
+            required="required"
+            placeholder="First Name"
+            name="givenName"
+          />
+        </div>
+
+        <div class="input-group">
+          <label for="family-name-input">Last Name</label>
+          <input
+            id="family-name-input"
+            type="text"
+            aria-required="true"
+            required="required"
+            placeholder="Last Name"
+            name="familyName"
+          />
+        </div>
+      </div>
+
+      <div id="card-container"></div>
+
+      <button type="submit">Pay $1.00</button>
+    </form>
+  </body>
+</html>
