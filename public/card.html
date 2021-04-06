@@ -55,7 +55,7 @@
                 const paymentResult = await createPayment({ tokenResult });
 
                 if (paymentResult) {
-                  // disable form submission on success
+                  // disable form submission on success to prevent duplicate submissions
                   const submitButton = cardForm.querySelector(
                     'button[type="submit"]'
                   );
@@ -71,7 +71,9 @@
         }
       }
 
-      initializePayments(appId, locationId);
+      initializePayments(appId, locationId).then((paymentResult) => {
+        console.debug('Payment Success', paymentResult);
+      });
     </script>
   </head>
   <body>
