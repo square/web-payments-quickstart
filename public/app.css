@@ -45,11 +45,21 @@ input {
 }
 
 button {
+  color: #ffffff;
+  background-color: #006aff;
   border-radius: 5px;
   cursor: pointer;
   border-style: none;
+  user-select: none;
   outline: none;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
   padding: 12px;
   width: 100%;
   box-shadow: 1px;
+}
+
+button:active {
+  background-color: rgb(0, 85, 204);
 }

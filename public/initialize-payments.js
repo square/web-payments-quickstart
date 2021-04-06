@@ -1,4 +1,3 @@
-import { loadSquarePayments } from './load-square-payments.js';
 import {
   createCardPaymentOnFormSubmit,
   initializeCard,
@@ -14,6 +13,7 @@ const intent = {
   CHARGE: 'CHARGE',
   STORE: 'STORE',
 };
+const sandboxAppId = 'sandbox-sq0idb-lybe_WkfKNAbb3WklswmwA';
 const locationId = 'LKYXSPGPXK05M';
 // These can also be found on your Order if you've created one already
 const amount = '1.00';
@@ -34,7 +34,7 @@ export default async function initializePayments() {
   // Collection of successfully initialized Payment sources
   const paymentMethods = [];
   // Load and Initialize Square Payments
-  const payments = await loadSquarePayments('sandbox', locationId);
+  const payments = await window.Square.payments(sandboxAppId, locationId);
 
   console.debug('Initialize payment methods');
   // ********************
