@@ -32,8 +32,6 @@
         return createPaymentResponse;
       }
 
-      function createCardPaymentOnFormSubmit(payments, card, paymentDetails) {}
-
       async function initializePayments(appId, locationId) {
         try {
           const payments = await window.Square.payments(appId, locationId);
@@ -53,16 +51,18 @@
 
               const tokenResult = await card.tokenize();
 
-              const paymentResult = await createPayment({ tokenResult });
+              if (tokenResult.status === 'OK') {
+                const paymentResult = await createPayment({ tokenResult });
 
-              if (paymentResult) {
-                // disable form submission on success
-                const submitButton = cardForm.querySelector(
-                  'button[type="submit"]'
-                );
-                submitButton.disabled = true;
+                if (paymentResult) {
+                  // disable form submission on success
+                  const submitButton = cardForm.querySelector(
+                    'button[type="submit"]'
+                  );
+                  submitButton.disabled = true;
 
-                resolve(paymentResult);
+                  resolve(paymentResult);
+                }
               }
             });
           });
