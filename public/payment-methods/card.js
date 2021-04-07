@@ -1,4 +1,5 @@
 import createPayment from '../services/create-payment.js';
+import { getBillingContact } from '../helpers/form.js';
 
 // Initialize and Attach a card.
 async function initializeCard({ payments, containerElementOrSelector }) {
@@ -32,8 +33,7 @@ async function initializeCard({ payments, containerElementOrSelector }) {
 async function createCardPayment(
   card,
   payments,
-  billingContact,
-  { intent, locationId, idempotencyKey, amount, currencyCode }
+  { intent, locationId, idempotencyKey, amount, currencyCode, billingContact }
 ) {
   // Tokenize Card
   const tokenResult = await card.tokenize();
@@ -65,16 +65,6 @@ async function createCardPayment(
   return false;
 }
 
-function getBillingContact(form) {
-  const formData = new FormData(form);
-  const billingContact = {
-    givenName: formData.get('givenName'),
-    familyName: formData.get('familyName'),
-  };
-
-  return billingContact;
-}
-
 function createCardPaymentOnFormSubmit(payments, card, paymentDetails) {
   const cardForm = document.querySelector('#card-form');
   const event = 'submit';
@@ -90,12 +80,10 @@ function createCardPaymentOnFormSubmit(payments, card, paymentDetails) {
       // Get other data bound to form submission
       const billingContact = getBillingContact(cardForm);
 
-      const paymentResult = await createCardPayment(
-        card,
-        payments,
+      const paymentResult = await createCardPayment(card, payments, {
         billingContact,
-        paymentDetails
-      );
+        ...paymentDetails,
+      });
 
       if (paymentResult) {
         resolve(paymentResult);

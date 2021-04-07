@@ -8,6 +8,7 @@ async function initializeApplePay({ payments, paymentRequest }) {
 
 async function createApplePayPayment(applePay, { idempotencyKey }) {
   const tokenResult = await applePay.tokenize();
+
   if (tokenResult.status === 'OK') {
     const paymentResult = await createPayment({
       tokenResult,

@@ -17,7 +17,7 @@
       // Checkpoint 1
       async function initializePayments(appId, locationId) {
         try {
-          const payments = await window.Square.payments(appId, locationId);
+          const payments = window.Square.payments(appId, locationId);
 
           const paymentRequest = payments.paymentRequest({
             countryCode: 'US',

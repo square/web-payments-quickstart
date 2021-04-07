@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="text/javascript"
+      src="https://sandbox.web.squarecdn.com/v0/square.js"
+    ></script>
+    <script type="module" src="payments.js"></script>
+    <link href="app.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="payment-form">
+      <form id="gift-card-form">
+        <div id="gift-card-container"></div>
+
+        <button type="submit">Apply Gift Card Balance</button>
+      </form>
+
+      <div id="apple-pay-container"></div>
+
+      <div id="google-pay-container"></div>
+
+      <form id="card-form">
+        <div class="buyer-inputs">
+          <input
+            type="text"
+            aria-required="true"
+            aria-label="First Name"
+            required="required"
+            placeholder="Given Name"
+            name="givenName"
+          />
+
+          <input
+            type="text"
+            aria-required="true"
+            aria-label="Last Name"
+            required="required"
+            placeholder="Family Name"
+            name="familyName"
+          />
+        </div>
+
+        <div id="card-container"></div>
+
+        <button type="submit">Pay with Credit Card</button>
+      </form>
+
+      <form id="ach-form">
+        <div class="buyer-inputs">
+          <input
+            type="text"
+            aria-required="true"
+            aria-label="First Name"
+            required="required"
+            placeholder="Given Name"
+            name="givenName"
+          />
+
+          <input
+            type="text"
+            aria-required="true"
+            aria-label="Last Name"
+            required="required"
+            placeholder="Family Name"
+            name="familyName"
+          />
+        </div>
+
+        <button id="ach-button" type="submit">Pay with Bank Account</button>
+      </form>
+    </div>
+  </body>
+</html>

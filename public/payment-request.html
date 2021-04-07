@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="app.css" rel="stylesheet" />
+    <script
+      type="text/javascript"
+      src="https://sandbox.web.squarecdn.com/v0/square.js"
+    ></script>
+    <script type="module">
+      // Checkpoint 1
+      import {
+        initializeGooglePay,
+        createGooglePayPaymentOnClick,
+      } from './payment-methods/google-pay.js';
+      // Checkpoint 1
+      const appId = 'sandbox-sq0idb-lybe_WkfKNAbb3WklswmwA';
+      const locationId = 'LKYXSPGPXK05M';
+
+      // Checkpoint 1
+      async function initializePayments(appId, locationId) {
+        const payments = window.Square.payments(appId, locationId);
+
+        const paymentRequest = payments.paymentRequest({
+          countryCode: 'US',
+          currencyCode: 'USD',
+          lineItems: [
+            { amount: '2.00', label: 'Item Cost', pending: false },
+            { amount: '0.00', label: 'Shipping', pending: false },
+            { amount: '0.00', label: 'Tax', pending: false },
+          ],
+          requestBillingContact: true,
+          requestShippingContact: true,
+          shippingOptions: [
+            {
+              amount: '0.00',
+              id: 'free-shipping',
+              label: 'Free',
+              detail: 'Free-Shipping',
+            },
+            {
+              amount: '10.00',
+              id: 'expedited-shipping',
+              label: 'Expedited',
+              detail: 'Expedited-Shipping',
+            },
+          ],
+          total: {
+            amount: '2.00',
+            label: 'Total',
+            pending: false,
+          },
+        });
+
+        // Checkpoint 2
+        paymentRequest.addEventListener(
+          'shippingcontactchanged',
+          (contact, update) => {
+            // Add your business logic here.
+            // This tells you the address of the buyer, and allows you to update your shipping options
+            // and pricing based on their location.
+            const isCA = contact.state === 'CA';
+
+            const newShippingOptions = [
+              {
+                id: '1',
+                label: isCA ? 'Free Shipping' : 'Standard Shipping',
+                amount: isCA ? '0.00' : '15.00',
+              },
+              {
+                id: '2',
+                label: 'Express Shipping',
+                amount: isCA ? '10.00' : '25.00',
+              },
+            ];
+
+            // update the shipping options as they change per location and go back to the first event
+            paymentRequest.lineItems.forEach((lineItem) => {
+              if (lineItem.label === 'Shipping') {
+                lineItem.amount = parseFloat(newShippingOptions[0].amount);
+              }
+            });
+            paymentRequest.total.amount = paymentRequest.lineItems
+              .reduce((total, lineItem) => {
+                total += parseFloat(lineItem.amount);
+                return total;
+              }, 0.0)
+              .toFixed(2);
+
+            // Calling update is required.
+            update({
+              lineItems: paymentRequest.lineItems,
+              shippingOptions: newShippingOptions,
+              total: paymentRequest.total,
+            });
+          }
+        );
+
+        // Checkpoint 3
+        paymentRequest.addEventListener(
+          'shippingoptionchanged',
+          (option, update) => {
+            // Add your business logic here.
+            // This tells you the shipping options selected by the buyer, and allows you to update
+            // totals based on the pricing of each shipping option.
+            paymentRequest.lineItems.forEach((lineItem) => {
+              if (lineItem.label === 'Shipping') {
+                lineItem.amount = option.amount;
+              }
+            });
+
+            paymentRequest.total.amount = paymentRequest.lineItems
+              .reduce((acc, lineItem) => {
+                acc += parseFloat(lineItem.amount);
+                return acc;
+              }, 0.0)
+              .toFixed(2);
+
+            // Calling update is required.
+            update({
+              lineItems: paymentRequest.lineItems,
+              total: paymentRequest.total,
+            });
+          }
+        );
+
+        // Checkpoint 1
+        try {
+          // Digital Wallets Buttons use the same element for both container and trigger
+          const googlePayContainerAndTrigger = '#google-pay-container';
+          const googlePay = await initializeGooglePay({
+            payments,
+            paymentRequest,
+            containerElementOrSelector: googlePayContainerAndTrigger,
+          });
+
+          return createGooglePayPaymentOnClick(googlePay);
+        } catch (e) {
+          console.error('Initializing Google Pay failed', e);
+        }
+      }
+
+      // Checkpoint 1
+      initializePayments(appId, locationId)
+        // Checkpoint 2
+        .then((paymentResult) => {
+          console.debug('Payment Success', paymentResult);
+        });
+    </script>
+  </head>
+  <body>
+    <div class="payment-form">
+      <div id="google-pay-container"></div>
+    </div>
+  </body>
+</html>

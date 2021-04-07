@@ -7,12 +7,16 @@ body {
 }
 
 .payment-form {
-  max-width: 485px;
+  max-width: 550px;
   min-width: 300px;
   margin: 150px auto;
 }
 
-.card-inputs {
+#gift-card-form {
+  margin-bottom: 30px;
+}
+
+.buyer-inputs {
   display: flex;
   gap: 20px;
   justify-content: space-between;
@@ -30,6 +34,10 @@ body {
   #card-container {
     min-height: 140px;
   }
+}
+
+#ach-button {
+  margin-top: 20px;
 }
 
 label {

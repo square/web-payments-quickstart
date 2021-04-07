@@ -17,7 +17,7 @@
       // Checkpoint 1
       async function initializePayments(appId, locationId) {
         try {
-          const payments = await window.Square.payments(appId, locationId);
+          const payments = window.Square.payments(appId, locationId);
 
           const giftCard = await payments.giftCard();
 
@@ -66,7 +66,7 @@
     <form id="gift-card-form" class="payment-form">
       <div id="gift-card-container"></div>
 
-      <button type="submit">Pay</button>
+      <button type="submit">Apply Gift Card Balance</button>
     </form>
   </body>
 </html>

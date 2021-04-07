@@ -8,6 +8,7 @@
     ></script>
     <script type="module">
       import createPayment from './services/create-payment.js';
+      import { getBillingContact } from '../helpers/form.js';
 
       const appId = 'sandbox-sq0idb-lybe_WkfKNAbb3WklswmwA';
       const locationId = 'LKYXSPGPXK05M';
@@ -52,16 +53,6 @@
         return false;
       }
 
-      function getBillingContact(form) {
-        const formData = new FormData(form);
-        const billingContact = {
-          givenName: formData.get('givenName'),
-          familyName: formData.get('familyName'),
-        };
-
-        return billingContact;
-      }
-
       function createCardPaymentOnFormSubmit(payments, card, paymentDetails) {
         const cardForm = document.querySelector('#card-form');
         const event = 'submit';
@@ -98,7 +89,7 @@
 
       async function initializePayments(appId, locationId) {
         try {
-          const payments = await window.Square.payments(appId, locationId);
+          const payments = window.Square.payments(appId, locationId);
 
           const card = await payments.card();
 
@@ -125,7 +116,7 @@
   </head>
   <body>
     <form id="card-form" class="payment-form">
-      <div class="card-inputs">
+      <div class="buyer-inputs">
         <input
           type="text"
           aria-required="true"

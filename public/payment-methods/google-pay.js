@@ -14,12 +14,12 @@ async function initializeGooglePay({
   return googlePay;
 }
 
-async function createGooglePayPayment(googlePay, { idempotencyKey }) {
+async function createGooglePayPayment(googlePay) {
   const tokenResult = await googlePay.tokenize();
+
   if (tokenResult.status === 'OK') {
     const paymentResult = await createPayment({
       tokenResult,
-      idempotencyKey,
     });
 
     if (paymentResult) {
@@ -30,15 +30,12 @@ async function createGooglePayPayment(googlePay, { idempotencyKey }) {
   return false;
 }
 
-function createGooglePayPaymentOnClick(googlePay, paymentDetails) {
+function createGooglePayPaymentOnClick(googlePay) {
   const googlePayTrigger = document.querySelector('#google-pay-container');
   const event = 'click';
   return new Promise((resolve) => {
     googlePayTrigger.addEventListener(event, async () => {
-      const paymentResult = await createGooglePayPayment(
-        googlePay,
-        paymentDetails
-      );
+      const paymentResult = await createGooglePayPayment(googlePay);
 
       if (paymentResult) {
         resolve(paymentResult);
