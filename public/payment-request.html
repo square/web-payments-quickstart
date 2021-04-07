@@ -52,76 +52,72 @@
         });
 
         // Checkpoint 2
-        paymentRequest.addEventListener(
-          'shippingcontactchanged',
-          (contact, update) => {
-            // Add your business logic here.
-            // This tells you the address of the buyer, and allows you to update your shipping options
-            // and pricing based on their location.
-            const isCA = contact.state === 'CA';
+        paymentRequest.on('shippingcontactchanged', (contact, update) => {
+          // Add your business logic here.
+          // This tells you the address of the buyer, and allows you to update your shipping options
+          // and pricing based on their location.
+          const isCA = contact.state === 'CA';
 
-            const newShippingOptions = [
-              {
-                id: '1',
-                label: isCA ? 'Free Shipping' : 'Standard Shipping',
-                amount: isCA ? '0.00' : '15.00',
-              },
-              {
-                id: '2',
-                label: 'Express Shipping',
-                amount: isCA ? '10.00' : '25.00',
-              },
-            ];
+          const newShippingOptions = [
+            {
+              id: '1',
+              label: isCA ? 'Free Shipping' : 'Standard Shipping',
+              amount: isCA ? '0.00' : '15.00',
+            },
+            {
+              id: '2',
+              label: 'Express Shipping',
+              amount: isCA ? '10.00' : '25.00',
+            },
+          ];
 
-            // update the shipping options as they change per location and go back to the first event
-            paymentRequest.lineItems.forEach((lineItem) => {
-              if (lineItem.label === 'Shipping') {
-                lineItem.amount = parseFloat(newShippingOptions[0].amount);
-              }
-            });
-            paymentRequest.total.amount = paymentRequest.lineItems
-              .reduce((total, lineItem) => {
-                total += parseFloat(lineItem.amount);
-                return total;
-              }, 0.0)
-              .toFixed(2);
+          // update the shipping options as they change per location and go back to the first event
+          paymentRequest.lineItems.forEach((lineItem) => {
+            if (lineItem.label === 'Shipping') {
+              lineItem.amount = parseFloat(newShippingOptions[0].amount);
+            }
+          });
 
-            // Calling update is required.
-            update({
-              lineItems: paymentRequest.lineItems,
-              shippingOptions: newShippingOptions,
-              total: paymentRequest.total,
-            });
-          }
-        );
+          paymentRequest.total.amount = paymentRequest.lineItems
+            .reduce((total, lineItem) => {
+              total += parseFloat(lineItem.amount);
+              return total;
+            }, 0.0)
+            .toFixed(2);
+
+          console.log('update', update);
+          // Calling update is required.
+          update({
+            lineItems: paymentRequest.lineItems,
+            shippingOptions: newShippingOptions,
+            total: paymentRequest.total,
+          });
+        });
 
         // Checkpoint 3
-        paymentRequest.addEventListener(
-          'shippingoptionchanged',
-          (option, update) => {
-            // Add your business logic here.
-            // This tells you the shipping options selected by the buyer, and allows you to update
-            // totals based on the pricing of each shipping option.
-            paymentRequest.lineItems.forEach((lineItem) => {
-              if (lineItem.label === 'Shipping') {
-                lineItem.amount = option.amount;
-              }
-            });
+        paymentRequest.on('shippingoptionchanged', (option, update) => {
+          // Add your business logic here.
+          // This tells you the shipping options selected by the buyer, and allows you to update
+          // totals based on the pricing of each shipping option.
+          paymentRequest.lineItems.forEach((lineItem) => {
+            if (lineItem.label === 'Shipping') {
+              lineItem.amount = option.amount;
+            }
+          });
 
-            paymentRequest.total.amount = paymentRequest.lineItems
-              .reduce((acc, lineItem) => {
-                acc += parseFloat(lineItem.amount);
-                return acc;
-              }, 0.0)
-              .toFixed(2);
+          paymentRequest.total.amount = paymentRequest.lineItems
+            .reduce((acc, lineItem) => {
+              acc += parseFloat(lineItem.amount);
+              return acc;
+            }, 0.0)
+            .toFixed(2);
 
-            // Calling update is required.
-            update({
-              lineItems: paymentRequest.lineItems,
-              total: paymentRequest.total,
-            });
-          }
-        );
+          // Calling update is required.
+          update({
+            lineItems: paymentRequest.lineItems,
+            total: paymentRequest.total,
+          });
+        });
 
         // Checkpoint 1
         try {
