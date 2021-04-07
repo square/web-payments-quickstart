@@ -12,6 +12,7 @@ const logger = require('./server/logger');
 // schema validates incoming requests
 // square provides the API client and error types
 const { ApiError, client: square } = require('./server/square');
+const { nanoid } = require('nanoid');
 
 async function createPayment(req, res) {
   const payload = await json(req);
@@ -22,7 +23,7 @@ async function createPayment(req, res) {
       logger.debug('Creating payment', { attempt });
 
       const payment = {
-        idempotencyKey: payload.idempotencyKey,
+        idempotencyKey: nanoid(),
         locationId: payload.locationId,
         sourceId: payload.tokenResult.token,
         // While it's tempting to pass this data from the client

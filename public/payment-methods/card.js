@@ -8,7 +8,9 @@ async function initializeCard({ payments, containerElementOrSelector }) {
     style: {
       '.input-container': {},
       '.input-container.is-error': {},
-      '.input-container.is-focus': {},
+      '.input-container.is-focus': {
+        borderColor: '#006aff',
+      },
       '.message-icon': {},
       '.message-icon.is-error': {},
       '.message-text': {},
@@ -81,6 +83,10 @@ function createCardPaymentOnFormSubmit(payments, card, paymentDetails) {
       e.preventDefault();
       e.stopPropagation();
 
+      // disable form submission
+      const submitButton = cardForm.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+
       // Get other data bound to form submission
       const billingContact = getBillingContact(cardForm);
 
@@ -92,12 +98,11 @@ function createCardPaymentOnFormSubmit(payments, card, paymentDetails) {
       );
 
       if (paymentResult) {
-        // disable form submission on success
-        const submitButton = cardForm.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-
         resolve(paymentResult);
       }
+
+      // Re-enable the button if we don't succeed
+      submitButton.disabled = false;
     });
   });
 }

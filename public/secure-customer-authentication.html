@@ -7,11 +7,9 @@
       src="https://sandbox.web.squarecdn.com/v0/square.js"
     ></script>
     <script type="module">
-      // Checkpoint 1
       const appId = 'sandbox-sq0idb-lybe_WkfKNAbb3WklswmwA';
       const locationId = 'LKYXSPGPXK05M';
 
-      // Checkpoint 2
       async function createPayment({ tokenResult }) {
         const body = JSON.stringify({
           tokenResult,
@@ -34,7 +32,6 @@
         return createPaymentResponse;
       }
 
-      // Checkpoint 1
       async function initializePayments(appId, locationId) {
         try {
           const payments = await window.Square.payments(appId, locationId);
@@ -44,7 +41,7 @@
           const cardContainer = '#card-container';
           await card.attach(cardContainer);
 
-          // Checkpoint 2
+          // TODO: create card payment
           const cardForm = document.querySelector('#card-form');
           const event = 'submit';
           return new Promise((resolve) => {
@@ -74,12 +71,9 @@
         }
       }
 
-      // Checkpoint 1
-      initializePayments(appId, locationId)
-        // Checkpoint 2
-        .then((paymentResult) => {
-          console.debug('Payment Success', paymentResult);
-        });
+      initializePayments(appId, locationId).then((paymentResult) => {
+        console.debug('Payment Success', paymentResult);
+      });
     </script>
   </head>
   <body>

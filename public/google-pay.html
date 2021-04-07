@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="app.css" rel="stylesheet" />
+    <script
+      type="text/javascript"
+      src="https://sandbox.web.squarecdn.com/v0/square.js"
+    ></script>
+    <script type="module">
+      // Checkpoint 2
+      import createPayment from './services/create-payment.js';
+
+      // Checkpoint 1
+      const appId = 'sandbox-sq0idb-lybe_WkfKNAbb3WklswmwA';
+      const locationId = 'LKYXSPGPXK05M';
+
+      // Checkpoint 1
+      async function initializePayments(appId, locationId) {
+        try {
+          const payments = await window.Square.payments(appId, locationId);
+
+          const paymentRequest = payments.paymentRequest({
+            countryCode: 'US',
+            currencyCode: 'USD',
+            total: {
+              amount: '1.00',
+              label: 'Total',
+              pending: false,
+            },
+          });
+
+          const googlePay = await payments.googlePay(paymentRequest);
+
+          const googlePayContainerSelector = '#google-pay-container';
+          await googlePay.attach(googlePayContainerSelector);
+
+          // Checkpoint 2
+          const googlePayButton = document.querySelector(
+            googlePayContainerSelector
+          );
+          const event = 'click';
+          return new Promise((resolve) => {
+            googlePayButton.addEventListener(event, async () => {
+              const tokenResult = await googlePay.tokenize();
+
+              if (tokenResult.status === 'OK') {
+                const paymentResult = await createPayment({ tokenResult });
+
+                if (paymentResult) {
+                  resolve(paymentResult);
+                }
+              }
+            });
+          });
+        } catch (e) {
+          console.error('Initializing Google Pay failed', e);
+        }
+      }
+
+      // Checkpoint 1
+      initializePayments(appId, locationId)
+        // Checkpoint 2
+        .then((paymentResult) => {
+          console.debug('Payment Success', paymentResult);
+        });
+    </script>
+  </head>
+  <body>
+    <div id="google-pay-container" class="payment-form"></div>
+  </body>
+</html>

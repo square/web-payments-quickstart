@@ -7,52 +7,32 @@
       src="https://sandbox.web.squarecdn.com/v0/square.js"
     ></script>
     <script type="module">
+      // Checkpoint 2
+      import createPayment from './services/create-payment.js';
+
       // Checkpoint 1
       const appId = 'sandbox-sq0idb-lybe_WkfKNAbb3WklswmwA';
       const locationId = 'LKYXSPGPXK05M';
-
-      // Checkpoint 2
-      async function createPayment({ tokenResult }) {
-        const body = JSON.stringify({
-          tokenResult,
-        });
-
-        const createPaymentResponse = await fetch('/payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body,
-        })
-          .then((response) => {
-            return response.json();
-          })
-          .catch((e) => {
-            console.error('Something went wrong processing the payment', e);
-          });
-
-        return createPaymentResponse;
-      }
 
       // Checkpoint 1
       async function initializePayments(appId, locationId) {
         try {
           const payments = await window.Square.payments(appId, locationId);
 
-          const card = await payments.card();
+          const giftCard = await payments.giftCard();
 
-          const cardContainer = '#card-container';
-          await card.attach(cardContainer);
+          const cardContainer = '#gift-card-container';
+          await giftCard.attach(cardContainer);
 
           // Checkpoint 2
-          const cardForm = document.querySelector('#card-form');
+          const cardForm = document.querySelector('#gift-card-form');
           const event = 'submit';
           return new Promise((resolve) => {
             cardForm.addEventListener(event, async (e) => {
               e.preventDefault();
               e.stopPropagation();
 
-              const tokenResult = await card.tokenize();
+              const tokenResult = await giftCard.tokenize();
 
               if (tokenResult.status === 'OK') {
                 const paymentResult = await createPayment({ tokenResult });
@@ -83,8 +63,8 @@
     </script>
   </head>
   <body>
-    <form id="card-form" class="payment-form">
-      <div id="card-container"></div>
+    <form id="gift-card-form" class="payment-form">
+      <div id="gift-card-container"></div>
 
       <button type="submit">Pay $1.00</button>
     </form>
