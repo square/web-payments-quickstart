@@ -1,66 +1,42 @@
-import deferredEvent from '../helpers/deferred-event.js';
 import createPayment from '../services/create-payment.js';
 
-function initializeapplePay({ payments, paymentRequest }) {
-  console.debug('Initialize Apple Pay');
-  return payments.applePay(paymentRequest);
+async function initializeApplePay({ payments, paymentRequest }) {
+  const applePay = await payments.applePay(paymentRequest);
+
+  return applePay;
 }
 
-// eslint-disable-next-line consistent-return
-async function createDeferredapplePayPayment(
-  applePay,
-  { locationId, idempotencyKey }
-) {
-  const applePayTrigger = document.querySelector('#apple-pay-container');
-  const event = 'click';
+async function createApplePayPayment(applePay, { idempotencyKey }) {
+  const tokenResult = await applePay.tokenize();
+  if (tokenResult.status === 'OK') {
+    const paymentResult = await createPayment({
+      tokenResult,
+      idempotencyKey,
+    });
 
-  let paymentComplete = false;
-  while (!paymentComplete) {
-    try {
-      console.debug('Binding Apple Pay tokenization to Event Listener');
-      const tokenResult = await deferredEvent(
-        applePayTrigger,
-        event,
-        async (resolve, reject) => {
-          try {
-            // Tokenize Apple Pay
-            const tokenResult = await applePay.tokenize();
-            if (tokenResult.status !== 'OK') {
-              reject(
-                new Error(
-                  `Apple Pay tokenization status: ${tokenResult.status}`
-                )
-              );
-            }
-            console.debug('Tokenized Apple Pay successfully', tokenResult);
-            // Resolve on success
-            resolve(tokenResult);
-            return;
-          } catch (e) {
-            reject(new Error('Something went wrong tokenizing Apple Pay', e));
-          }
-        }
-      );
-
-      if (tokenResult) {
-        const paymentResult = await createPayment({
-          tokenResult,
-          locationId,
-          idempotencyKey,
-        });
-
-        if (paymentResult) {
-          console.debug('Apple Pay Payment Complete', paymentResult);
-
-          paymentComplete = true;
-          return paymentResult;
-        }
-      }
-    } catch (e) {
-      // Log any errors that occur to help debug issues your customers might be encountering.
-      console.error(e);
+    if (paymentResult) {
+      return paymentResult;
     }
   }
+
+  return false;
 }
 
-export { initializeapplePay, createDeferredapplePayPayment };
+function createApplePayPaymentOnClick(applePay, paymentDetails) {
+  const applePayTrigger = document.querySelector('#apple-pay-container');
+  const event = 'click';
+  return new Promise((resolve) => {
+    applePayTrigger.addEventListener(event, async () => {
+      const paymentResult = await createApplePayPayment(
+        applePay,
+        paymentDetails
+      );
+
+      if (paymentResult) {
+        resolve(paymentResult);
+      }
+    });
+  });
+}
+
+export { initializeApplePay, createApplePayPaymentOnClick };

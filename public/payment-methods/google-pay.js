@@ -8,32 +8,21 @@ async function initializeGooglePay({
   console.debug('Initialize Google Pay');
   // Show Google Pay customization options
   const googlePay = await payments.googlePay(paymentRequest);
-  try {
-    console.debug('Attach Google Pay');
-    await googlePay.attach(containerElementOrSelector);
-  } catch (e) {
-    console.error('Something went wrong attaching Google Pay', e);
-  }
+
+  await googlePay.attach(containerElementOrSelector);
 
   return googlePay;
 }
 
-async function createGooglePayPayment(
-  googlePay,
-  { locationId, idempotencyKey }
-) {
-  // Tokenize Google Pay
+async function createGooglePayPayment(googlePay, { idempotencyKey }) {
   const tokenResult = await googlePay.tokenize();
   if (tokenResult.status === 'OK') {
     const paymentResult = await createPayment({
       tokenResult,
-      locationId,
       idempotencyKey,
     });
 
     if (paymentResult) {
-      console.debug('Google Pay Payment Complete', paymentResult);
-
       return paymentResult;
     }
   }
@@ -41,14 +30,11 @@ async function createGooglePayPayment(
   return false;
 }
 
-function createDeferredGooglePayPayment(googlePay, paymentDetails) {
+function createGooglePayPaymentOnClick(googlePay, paymentDetails) {
   const googlePayTrigger = document.querySelector('#google-pay-container');
   const event = 'click';
   return new Promise((resolve) => {
-    googlePayTrigger.addEventListener(event, async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
+    googlePayTrigger.addEventListener(event, async () => {
       const paymentResult = await createGooglePayPayment(
         googlePay,
         paymentDetails
@@ -61,4 +47,4 @@ function createDeferredGooglePayPayment(googlePay, paymentDetails) {
   });
 }
 
-export { initializeGooglePay, createDeferredGooglePayPayment };
+export { initializeGooglePay, createGooglePayPaymentOnClick };

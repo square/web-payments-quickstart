@@ -51,6 +51,11 @@ input:focus {
   border: 1px solid #006aff;
 }
 
+input:disabled {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.3);
+}
+
 button {
   color: #ffffff;
   background-color: #006aff;

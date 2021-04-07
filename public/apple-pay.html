@@ -19,38 +19,37 @@
         try {
           const payments = await window.Square.payments(appId, locationId);
 
-          const giftCard = await payments.giftCard();
+          const paymentRequest = payments.paymentRequest({
+            countryCode: 'US',
+            currencyCode: 'USD',
+            total: {
+              amount: '1.00',
+              label: 'Total',
+            },
+          });
 
-          const cardContainer = '#gift-card-container';
-          await giftCard.attach(cardContainer);
+          const applePay = await payments.applePay(paymentRequest);
+          // Note: Apple Pay does not have an .attach(...) method
+          // It's automatically attached by the browser.
 
           // Checkpoint 2
-          const giftCardForm = document.querySelector('#gift-card-form');
-          const event = 'submit';
+          const applePayButton = document.querySelector('#apple-pay-container');
+          const event = 'click';
           return new Promise((resolve) => {
-            giftCardForm.addEventListener(event, async (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-
-              const tokenResult = await giftCard.tokenize();
+            applePayButton.addEventListener(event, async () => {
+              const tokenResult = await applePay.tokenize();
 
               if (tokenResult.status === 'OK') {
                 const paymentResult = await createPayment({ tokenResult });
 
                 if (paymentResult) {
-                  // disable form submission on success to prevent duplicate submissions
-                  const submitButton = giftCardForm.querySelector(
-                    'button[type="submit"]'
-                  );
-                  submitButton.disabled = true;
-
                   resolve(paymentResult);
                 }
               }
             });
           });
         } catch (e) {
-          console.error('Initializing Gift Card failed', e);
+          console.error('Initializing Apple Pay failed', e);
         }
       }
 
@@ -63,10 +62,6 @@
     </script>
   </head>
   <body>
-    <form id="gift-card-form" class="payment-form">
-      <div id="gift-card-container"></div>
-
-      <button type="submit">Pay</button>
-    </form>
+    <div id="apple-pay-container" class="payment-form"></div>
   </body>
 </html>

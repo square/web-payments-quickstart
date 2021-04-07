@@ -22,8 +22,9 @@ async function createPayment(req, res) {
     try {
       logger.debug('Creating payment', { attempt });
 
+      const idempotencyKey = payload.idempotencyKey || nanoid();
       const payment = {
-        idempotencyKey: nanoid(),
+        idempotencyKey,
         locationId: payload.locationId,
         sourceId: payload.tokenResult.token,
         // While it's tempting to pass this data from the client

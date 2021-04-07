@@ -7,29 +7,93 @@
       src="https://sandbox.web.squarecdn.com/v0/square.js"
     ></script>
     <script type="module">
+      import createPayment from './services/create-payment.js';
+
       const appId = 'sandbox-sq0idb-lybe_WkfKNAbb3WklswmwA';
       const locationId = 'LKYXSPGPXK05M';
 
-      async function createPayment({ tokenResult }) {
-        const body = JSON.stringify({
-          tokenResult,
-        });
+      // Call this function to tokenize the card, verify the buyer, and create a payment.
+      async function createCardPayment(
+        card,
+        payments,
+        billingContact,
+        { intent, locationId, idempotencyKey, amount, currencyCode }
+      ) {
+        // Tokenize Card
+        const tokenResult = await card.tokenize();
 
-        const createPaymentResponse = await fetch('/payment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body,
-        })
-          .then((response) => {
-            return response.json();
-          })
-          .catch((e) => {
-            console.error('Something went wrong processing the payment', e);
+        if (tokenResult.status === 'OK') {
+          const verificationDetails = await payments.verifyBuyer(
+            tokenResult.token,
+            {
+              intent,
+              billingContact,
+              amount,
+              currencyCode,
+            }
+          );
+
+          if (tokenResult && verificationDetails) {
+            const paymentResult = await createPayment({
+              tokenResult,
+              verificationDetails,
+              locationId,
+              idempotencyKey,
+            });
+
+            if (paymentResult) {
+              console.debug('Card Payment Complete', paymentResult);
+
+              return paymentResult;
+            }
+          }
+        }
+
+        return false;
+      }
+
+      function getBillingContact(form) {
+        const formData = new FormData(form);
+        const billingContact = {
+          givenName: formData.get('givenName'),
+          familyName: formData.get('familyName'),
+        };
+
+        return billingContact;
+      }
+
+      function createCardPaymentOnFormSubmit(payments, card, paymentDetails) {
+        const cardForm = document.querySelector('#card-form');
+        const event = 'submit';
+        return new Promise((resolve) => {
+          cardForm.addEventListener(event, async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // disable form submission
+            const submitButton = cardForm.querySelector(
+              'button[type="submit"]'
+            );
+            submitButton.disabled = true;
+
+            // Get other data bound to form submission
+            const billingContact = getBillingContact(cardForm);
+
+            const paymentResult = await createCardPayment(
+              card,
+              payments,
+              billingContact,
+              paymentDetails
+            );
+
+            if (paymentResult) {
+              resolve(paymentResult);
+            }
+
+            // Re-enable the button if we don't succeed
+            submitButton.disabled = false;
           });
-
-        return createPaymentResponse;
+        });
       }
 
       async function initializePayments(appId, locationId) {
@@ -41,31 +105,14 @@
           const cardContainer = '#card-container';
           await card.attach(cardContainer);
 
-          // TODO: create card payment
-          const cardForm = document.querySelector('#card-form');
-          const event = 'submit';
-          return new Promise((resolve) => {
-            cardForm.addEventListener(event, async (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-
-              const tokenResult = await card.tokenize();
-
-              if (tokenResult.status === 'OK') {
-                const paymentResult = await createPayment({ tokenResult });
-
-                if (paymentResult) {
-                  // disable form submission on success to prevent duplicate submissions
-                  const submitButton = cardForm.querySelector(
-                    'button[type="submit"]'
-                  );
-                  submitButton.disabled = true;
-
-                  resolve(paymentResult);
-                }
-              }
-            });
-          });
+          const paymentDetails = {
+            intent: 'CHARGE',
+            amount: '1.00',
+            currencyCode: 'US',
+            countryCode: 'USD',
+            locationId,
+          };
+          return createCardPaymentOnFormSubmit(card, payments, paymentDetails);
         } catch (e) {
           console.error('Initializing Card failed', e);
         }
@@ -78,9 +125,29 @@
   </head>
   <body>
     <form id="card-form" class="payment-form">
+      <div class="card-inputs">
+        <input
+          type="text"
+          aria-required="true"
+          aria-label="First Name"
+          required="required"
+          placeholder="Given Name"
+          name="givenName"
+        />
+
+        <input
+          type="text"
+          aria-required="true"
+          aria-label="Last Name"
+          required="required"
+          placeholder="Family Name"
+          name="familyName"
+        />
+      </div>
+
       <div id="card-container"></div>
 
-      <button type="submit">Pay $1.00</button>
+      <button type="submit">Pay</button>
     </form>
   </body>
 </html>
