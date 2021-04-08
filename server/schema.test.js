@@ -26,7 +26,6 @@ test('validatePaymentPayload returns false if incomplete payload', (t) => {
   t.false(
     schema.validatePaymentPayload({
       locationId: 'LKYXSPGPXK05M',
-      sourceId: 't0k3n',
     })
   );
 });

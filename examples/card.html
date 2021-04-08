@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="app.css" rel="stylesheet" />
+    <script
+      type="text/javascript"
+      src="https://sandbox.web.squarecdn.com/v0/square.js"
+    ></script>
+    <script type="module">
+      // Checkpoint 1
+      const appId = '{APPLICATION_ID}';
+      const locationId = '{LOCATION_ID}';
+
+      // Checkpoint 2
+      async function createPayment({ tokenResult }) {
+        const body = JSON.stringify({
+          locationId,
+          sourceId: tokenResult.token,
+        });
+
+        const paymentResponse = await fetch('/payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body,
+        });
+
+        if (paymentResponse.ok) {
+          return paymentResponse.json();
+        }
+
+        const errorBody = await paymentResponse.text();
+        throw new Error(errorBody);
+      }
+
+      // Checkpoint 1
+      async function initializePayments(appId, locationId) {
+        try {
+          const payments = window.Square.payments(appId, locationId);
+
+          const card = await payments.card();
+          await card.attach('#card-container');
+
+          // Checkpoint 2
+          const cardForm = document.querySelector('#card-form');
+          const event = 'submit';
+          return new Promise((resolve, reject) => {
+            cardForm.addEventListener(event, async (e) => {
+              e.preventDefault();
+
+              let tokenResult;
+              try {
+                tokenResult = await card.tokenize();
+              } catch (e) {
+                reject(e);
+                return;
+              }
+
+              if (tokenResult.status === 'OK') {
+                const paymentResult = await createPayment({ tokenResult });
+
+                if (paymentResult) {
+                  // disable form submission on success to prevent duplicate submissions
+                  const submitButton = cardForm.querySelector(
+                    'button[type="submit"]'
+                  );
+                  submitButton.disabled = true;
+
+                  resolve(paymentResult);
+                }
+              }
+            });
+          });
+        } catch (e) {
+          console.error('Initializing Card failed', e);
+          throw e;
+        }
+      }
+
+      // Checkpoint 1
+      document.addEventListener('DOMContentLoaded', async function () {
+        if (!window.Square) {
+          throw new Error('Square.js failed to load properly');
+        }
+
+        try {
+          const paymentResult = await initializePayments(appId, locationId);
+          console.debug('Payment Success', paymentResult);
+        } catch (e) {
+          console.error('Payment Failure', e);
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <form id="card-form" class="payment-form">
+      <div id="card-container"></div>
+
+      <button type="submit">Pay</button>
+    </form>
+  </body>
+</html>
