@@ -4,7 +4,7 @@
     <link href="app.css" rel="stylesheet" />
     <script
       type="text/javascript"
-      src="https://sandbox.web.squarecdn.com/v0/square.js"
+      src="https://sandbox.web.squarecdn.com/0.0.29-canary.sha-8a9da52/square.js"
     ></script>
     <script type="module">
       // Checkpoint 1
@@ -20,102 +20,133 @@
       async function initializePayments(appId, locationId) {
         const payments = window.Square.payments(appId, locationId);
 
-        const paymentRequest = payments.paymentRequest({
+        const defaultShippingOptions = [
+          {
+            amount: '0.00',
+            id: 'shipping-option-1',
+            label: 'Free',
+          },
+          {
+            amount: '10.00',
+            id: 'shipping-option-2',
+            label: 'Expedited',
+          },
+        ];
+
+        let lineItems = [
+          { amount: '2.00', label: 'Item Cost', pending: false },
+          { amount: '0.00', label: 'Shipping', pending: false },
+          { amount: '0.50', label: 'Tax', pending: false },
+        ];
+
+        let total = {
+          amount: '2.50',
+          label: 'Total',
+          pending: false,
+        };
+
+        const paymentRequestDetails = {
           countryCode: 'US',
           currencyCode: 'USD',
-          lineItems: [
-            { amount: '2.00', label: 'Item Cost', pending: false },
-            { amount: '0.00', label: 'Shipping', pending: false },
-            { amount: '0.00', label: 'Tax', pending: false },
-          ],
+          lineItems,
           requestBillingContact: true,
           requestShippingContact: true,
-          shippingOptions: [
-            {
-              amount: '0.00',
-              id: 'free-shipping',
-              label: 'Free',
-              detail: 'Free-Shipping',
-            },
-            {
-              amount: '10.00',
-              id: 'expedited-shipping',
-              label: 'Expedited',
-              detail: 'Expedited-Shipping',
-            },
-          ],
-          total: {
-            amount: '2.00',
-            label: 'Total',
-            pending: false,
-          },
-        });
+          shippingOptions: defaultShippingOptions,
+          total,
+        };
+
+        const paymentRequest = payments.paymentRequest(paymentRequestDetails);
 
         // Checkpoint 2
-        paymentRequest.on('shippingcontactchanged', (contact, update) => {
+        paymentRequest.addEventListener('shippingcontactchanged', (contact, update) => {
           // Add your business logic here.
           // This tells you the address of the buyer, and allows you to update your shipping options
           // and pricing based on their location.
           const isCA = contact.state === 'CA';
 
-          const newShippingOptions = [
+          const newShippingOptions = isCA ? defaultShippingOptions : [
             {
-              id: '1',
-              label: isCA ? 'Free Shipping' : 'Standard Shipping',
-              amount: isCA ? '0.00' : '15.00',
+              id: 'shipping-options-3',
+              label: 'Standard Shipping',
+              amount: '15.00',
             },
             {
-              id: '2',
+              id: 'shipping-options-4',
               label: 'Express Shipping',
-              amount: isCA ? '10.00' : '25.00',
+              amount: '25.00',
             },
           ];
 
           // update the shipping options as they change per location and go back to the first event
-          paymentRequest.lineItems.forEach((lineItem) => {
+          let updatedShippingItem = false;
+          let newLineItems = lineItems.map((lineItem) => {
             if (lineItem.label === 'Shipping') {
-              lineItem.amount = parseFloat(newShippingOptions[0].amount);
+              updatedShippingItem = true;
+              return Object.assign({}, lineItem, { amount: newShippingOptions[0].amount })
             }
+
+            return lineItem;
           });
 
-          paymentRequest.total.amount = paymentRequest.lineItems
+          if (!updatedShippingItem) {
+            newLineItems.push({ label: 'Shipping', amount: newShippingOptions[0].amount, pending: false });
+          }
+
+          // Add up the amounts and convert to a string in the format of #.##, e.g. '2.23'
+          const amount = newLineItems
             .reduce((total, lineItem) => {
               total += parseFloat(lineItem.amount);
               return total;
             }, 0.0)
             .toFixed(2);
 
-          console.log('update', update);
-          // Calling update is required.
+          const newTotal = Object.assign({}, total, { amount });
+
+          total = newTotal;
+          lineItems = newLineItems;
+
           update({
-            lineItems: paymentRequest.lineItems,
+            lineItems: newLineItems,
             shippingOptions: newShippingOptions,
-            total: paymentRequest.total,
+            total: newTotal,
           });
         });
 
         // Checkpoint 3
-        paymentRequest.on('shippingoptionchanged', (option, update) => {
+        paymentRequest.addEventListener('shippingoptionchanged', (option, update) => {
           // Add your business logic here.
           // This tells you the shipping options selected by the buyer, and allows you to update
           // totals based on the pricing of each shipping option.
-          paymentRequest.lineItems.forEach((lineItem) => {
+          let updatedShippingItem = false;
+          let newLineItems = lineItems.map((lineItem) => {
             if (lineItem.label === 'Shipping') {
-              lineItem.amount = option.amount;
+              updatedShippingItem = true;
+              return Object.assign({}, lineItem, { amount: option.amount });
             }
+
+            return lineItem;
           });
 
-          paymentRequest.total.amount = paymentRequest.lineItems
-            .reduce((acc, lineItem) => {
-              acc += parseFloat(lineItem.amount);
-              return acc;
-            }, 0.0)
-            .toFixed(2);
+          if (!updatedShippingItem) {
+            newLineItems.push({ label: 'Shipping', amount: option.amount, pending: false });
+          }
+
+          const amount = newLineItems
+                  .reduce((total, lineItem) => {
+                    total += parseFloat(lineItem.amount);
+                    return total;
+                  }, 0.0)
+                  .toFixed(2);
+
+          const newTotal = Object.assign({}, total, { amount });
+
+          total = newTotal;
+          lineItems = newLineItems;
 
           // Calling update is required.
           update({
-            lineItems: paymentRequest.lineItems,
-            total: paymentRequest.total,
+            lineItems,
+            total,
           });
         });
 
