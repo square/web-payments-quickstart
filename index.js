@@ -17,7 +17,7 @@ const { nanoid } = require('nanoid');
 
 async function createPayment(req, res) {
   const payload = await json(req);
-  console.debug(JSON.stringify(payload));
+  logger.debug(JSON.stringify(payload));
   if (!validatePaymentPayload(payload)) {
     throw createError(400, 'Bad Request');
   }
@@ -34,12 +34,16 @@ async function createPayment(req, res) {
         // Doing so allows bad actor to modify these values
         // Instead, leverage Orders to create an order on the server
         // and pass the Order ID to createPayment rather than raw amounts
+        // See Orders documentation: https://developer.squareup.com/docs/orders-api/what-it-does
         amountMoney: {
-          amount: '100',
+          amount: '100', // the expected amount is in cents, meaning this is $1.00.
           currency: 'USD',
         },
       };
 
+      // VerificationDetails is part of Secure Card Authentication.
+      // This part of the payload is highly recommended (and required for some countries)
+      // for 'unauthenticated' payment methods like Cards.
       if (payload.verificationDetails && payload.verificationDetails.token) {
         payment.verificationToken = payload.verificationDetails.token;
       }

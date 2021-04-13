@@ -22,10 +22,10 @@
       }
 
       // Checkpoint 2
-      async function createPayment(tokenResult) {
+      async function createPayment(token) {
         const body = JSON.stringify({
           locationId,
-          sourceId: tokenResult.token,
+          sourceId: token,
         });
 
         const paymentResponse = await fetch('/payment', {
@@ -47,7 +47,7 @@
       async function tokenizeAndCreatePayment(card) {
         const tokenResult = await card.tokenize();
         if (tokenResult.status === 'OK') {
-          return await createPayment(tokenResult);
+          return await createPayment(tokenResult.token);
         } else {
           throw new Error(
             `Tokenization errors: ${JSON.stringify(tokenResult.errors)}`
@@ -70,19 +70,20 @@
         }
 
         // Checkpoint 2.
-        const cardForm = document.querySelector('#card-form');
-        cardForm.addEventListener('submit', async function (event) {
+        const cardSubmissionButton = document.getElementById(
+          'card-submission-button'
+        );
+        cardSubmissionButton.addEventListener('click', async function (event) {
           event.preventDefault();
 
           try {
+            // disable the submit button as we await tokenization and making a payment request.
+            cardSubmissionButton.disabled = true;
             const paymentResults = await tokenizeAndCreatePayment(card);
-            const submitButton = cardForm.querySelector(
-              'button[type="submit"]'
-            );
-            submitButton.disabled = true;
 
             console.debug('Payment Success', paymentResults);
           } catch (e) {
+            cardSubmissionButton.disabled = false;
             console.error(e.message);
           }
         });
@@ -90,10 +91,9 @@
     </script>
   </head>
   <body>
-    <form id="card-form" class="payment-form">
+    <form id="payment-form">
       <div id="card-container"></div>
-
-      <button type="submit">Pay</button>
+      <button id="card-submission-button" type="submit">Pay</button>
     </form>
   </body>
 </html>

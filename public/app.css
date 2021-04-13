@@ -6,7 +6,7 @@ body {
   font-family: 'Square Market', Arial, sans-serif;
 }
 
-.payment-form {
+#payment-form {
   max-width: 550px;
   min-width: 300px;
   margin: 150px auto;
