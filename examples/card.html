@@ -81,6 +81,9 @@
             cardSubmissionButton.disabled = true;
             const paymentResults = await tokenizeAndCreatePayment(card);
 
+            alert(
+              'The payment succeeded. Check you Sandbox Seller test account'
+            );
             console.debug('Payment Success', paymentResults);
           } catch (e) {
             cardSubmissionButton.disabled = false;
@@ -93,7 +96,7 @@
   <body>
     <form id="payment-form">
       <div id="card-container"></div>
-      <button id="card-submission-button" type="submit">Pay</button>
+      <button id="card-submission-button" type="submit">Pay $1.00</button>
     </form>
   </body>
 </html>
