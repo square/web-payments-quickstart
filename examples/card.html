@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="app.css" rel="stylesheet" />
+    <script
+      type="text/javascript"
+      src="https://sandbox.web.squarecdn.com/v0/square.js"
+    ></script>
+    <script type="module">
+      // Checkpoint 1
+      const appId = '{APPLICATION_ID}';
+      const locationId = '{LOCATION_ID}';
+
+      // Checkpoint 1
+      async function initializePayments(appId, locationId) {
+        const payments = window.Square.payments(appId, locationId);
+
+        const card = await payments.card();
+        await card.attach('#card-container');
+
+        return card;
+      }
+
+      // Checkpoint 2
+      async function createPayment(token) {
+        const body = JSON.stringify({
+          locationId,
+          sourceId: token,
+        });
+
+        const paymentResponse = await fetch('/payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body,
+        });
+
+        if (paymentResponse.ok) {
+          return paymentResponse.json();
+        }
+
+        const errorBody = await paymentResponse.text();
+        throw new Error(errorBody);
+      }
+
+      async function tokenizeAndCreatePayment(card) {
+        const tokenResult = await card.tokenize();
+        if (tokenResult.status === 'OK') {
+          return await createPayment(tokenResult.token);
+        } else {
+          throw new Error(
+            `Tokenization errors: ${JSON.stringify(tokenResult.errors)}`
+          );
+        }
+      }
+
+      // Checkpoint 1
+      document.addEventListener('DOMContentLoaded', async function () {
+        if (!window.Square) {
+          throw new Error('Square.js failed to load properly');
+        }
+
+        let card;
+        try {
+          card = await initializePayments(appId, locationId);
+        } catch (e) {
+          console.error('Initializing Card failed', e);
+          return;
+        }
+
+        // Checkpoint 2.
+        const cardSubmissionButton = document.getElementById(
+          'card-submission-button'
+        );
+        cardSubmissionButton.addEventListener('click', async function (event) {
+          event.preventDefault();
+
+          try {
+            // disable the submit button as we await tokenization and making a payment request.
+            cardSubmissionButton.disabled = true;
+            const paymentResults = await tokenizeAndCreatePayment(card);
+
+            console.debug('Payment Success', paymentResults);
+          } catch (e) {
+            cardSubmissionButton.disabled = false;
+            console.error(e.message);
+          }
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <form id="payment-form">
+      <div id="card-container"></div>
+      <button id="card-submission-button" type="submit">Pay</button>
+    </form>
+  </body>
+</html>

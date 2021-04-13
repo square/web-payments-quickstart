@@ -46,23 +46,3 @@ test('createPayment errors with invalid payload', async (t) => {
 
   service.close(t.falsy);
 });
-
-test('createPayment tries to create payment with valid payload', async (t) => {
-  const service = micro(main);
-  const url = await listen(service);
-  const res = await fetch(`${url}/payment`, {
-    method: 'post',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      amount: 100,
-      locationId: 'LKYXSPGPXK05M',
-      sourceId: 't0k3n',
-    }),
-  });
-
-  // expect 'unauthroized' response because no access token (from .env) or sourceId
-  t.false(res.ok);
-  t.is(res.status, 401);
-
-  service.close(t.falsy);
-});

@@ -1,11 +1,9 @@
 // micro provides http helpers
-const { createError, json } = require('micro');
+const { createError, json, send } = require('micro');
 // microrouter provides http server routing
 const { router, get, post } = require('microrouter');
 // serve-handler serves static assets
 const staticHandler = require('serve-handler');
-// nanoid generates random identifiers
-const { nanoid } = require('nanoid');
 // async-retry will retry failed API requests
 const retry = require('async-retry');
 
@@ -15,32 +13,56 @@ const logger = require('./server/logger');
 const { validatePaymentPayload } = require('./server/schema');
 // square provides the API client and error types
 const { ApiError, client: square } = require('./server/square');
+const { nanoid } = require('nanoid');
 
-async function createPayment(req) {
+async function createPayment(req, res) {
   const payload = await json(req);
-
+  logger.debug(JSON.stringify(payload));
   if (!validatePaymentPayload(payload)) {
     throw createError(400, 'Bad Request');
   }
-
-  // See: https://developer.squareup.com/docs/working-with-apis/idempotency
-  const idempotencyKey = nanoid();
-
   await retry(async (bail, attempt) => {
     try {
-      logger.debug('Creating payment', { attempt, idempotencyKey });
+      logger.debug('Creating payment', { attempt });
 
-      const { result, statusCode } = await square.paymentsApi.createPayment({
+      const idempotencyKey = payload.idempotencyKey || nanoid();
+      const payment = {
         idempotencyKey,
-        amountMoney: {
-          amount: payload.amount,
-          currency: 'USD', // IDEA: multiple currencies
-        },
         locationId: payload.locationId,
         sourceId: payload.sourceId,
-      });
+        // While it's tempting to pass this data from the client
+        // Doing so allows bad actor to modify these values
+        // Instead, leverage Orders to create an order on the server
+        // and pass the Order ID to createPayment rather than raw amounts
+        // See Orders documentation: https://developer.squareup.com/docs/orders-api/what-it-does
+        amountMoney: {
+          amount: '100', // the expected amount is in cents, meaning this is $1.00.
+          currency: 'USD',
+        },
+      };
+
+      // VerificationDetails is part of Secure Card Authentication.
+      // This part of the payload is highly recommended (and required for some countries)
+      // for 'unauthenticated' payment methods like Cards.
+      if (payload.verificationDetails && payload.verificationDetails.token) {
+        payment.verificationToken = payload.verificationDetails.token;
+      }
+
+      const { result, statusCode } = await square.paymentsApi.createPayment(
+        payment
+      );
 
       logger.info('Payment succeeded!', { result, statusCode });
+
+      send(res, statusCode, {
+        success: true,
+        payment: {
+          id: result.payment.id,
+          status: result.payment.status,
+          receiptUrl: result.payment.receiptUrl,
+          orderId: result.payment.orderId,
+        },
+      });
     } catch (ex) {
       if (ex instanceof ApiError) {
         // likely an error in the request. don't retry
@@ -53,8 +75,6 @@ async function createPayment(req) {
       }
     }
   });
-
-  return { success: true };
 }
 
 // serve static files like index.html and favicon.ico from public/ directory

@@ -1,0 +1,85 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Square Market', Arial, sans-serif;
+}
+
+#payment-form {
+  max-width: 550px;
+  min-width: 300px;
+  margin: 150px auto;
+}
+
+#gift-card-form {
+  margin-bottom: 30px;
+}
+
+.buyer-inputs {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+#card-container {
+  margin-top: 20px;
+  /* this height depends on the size of the container element */
+  /* We transition from a single row to double row at 485px */
+  /* Settting this min-height minimizes the impact of the card form loading */
+  min-height: 90px;
+}
+
+@media screen and (max-width: 500px) {
+  #card-container {
+    min-height: 140px;
+  }
+}
+
+#ach-button {
+  margin-top: 20px;
+}
+
+label {
+  font-size: 12px;
+  width: 100%;
+}
+
+input {
+  padding: 12px;
+  width: 100%;
+  border-radius: 5px;
+  border-width: 1px;
+  margin-top: 20px;
+  font-size: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+input:focus {
+  border: 1px solid #006aff;
+}
+
+button {
+  color: #ffffff;
+  background-color: #006aff;
+  border-radius: 5px;
+  cursor: pointer;
+  border-style: none;
+  user-select: none;
+  outline: none;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  padding: 12px;
+  width: 100%;
+  box-shadow: 1px;
+}
+
+button:active {
+  background-color: rgb(0, 85, 204);
+}
+
+button:disabled {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.3);
+}

@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "start": "NODE_ENV=production micro --listen tcp://0.0.0.0:${PORT-3000}",
+    "start:sandbox": "NODE_ENV=sandbox micro --listen tcp://0.0.0.0:${PORT-3000}",
     "inspect": "node --inspect node_modules/.bin/micro-dev",
     "dev": "micro-dev",
     "lint": "npm-run-all --serial lint:*",
