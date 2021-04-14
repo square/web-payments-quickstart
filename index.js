@@ -44,8 +44,8 @@ async function createPayment(req, res) {
       // VerificationDetails is part of Secure Card Authentication.
       // This part of the payload is highly recommended (and required for some countries)
       // for 'unauthenticated' payment methods like Cards.
-      if (payload.verificationDetails && payload.verificationDetails.token) {
-        payment.verificationToken = payload.verificationDetails.token;
+      if (payload.verificationToken) {
+        payment.verificationToken = payload.verificationToken;
       }
 
       const { result, statusCode } = await square.paymentsApi.createPayment(

@@ -17,10 +17,11 @@
         return card;
       }
 
-      async function createPayment(token) {
+      async function createPayment(token, verificationToken) {
         const body = JSON.stringify({
           locationId,
           sourceId: token,
+          verificationToken,
         });
 
         const paymentResponse = await fetch('/payment', {
@@ -50,11 +51,34 @@
         }
       }
 
+      async function verifyBuyer(payments, token) {
+        const verificationDetails = {
+          amount: '1.00',
+          billingContact: {
+            addressLines: ['123 Main Street', 'Apartment 1'],
+            familyName: 'Doe',
+            givenName: 'John',
+            email: 'jondoe@gmail.com',
+            country: 'GB',
+            phone: '3214563987',
+            region: 'LND',
+            city: 'London',
+          },
+          currencyCode: 'GBP',
+          intent: 'CHARGE',
+        };
+
+        const verificationResults = await payments.verifyBuyer(
+          token,
+          verificationDetails
+        );
+        return verificationResults.token;
+      }
+
       document.addEventListener('DOMContentLoaded', async function () {
         if (!window.Square) {
           throw new Error('Square.js failed to load properly');
         }
-
         const payments = window.Square.payments(appId, locationId);
         let card;
         try {
@@ -64,7 +88,6 @@
           return;
         }
 
-        // Checkpoint 2.
         const cardSubmissionButton = document.getElementById(
           'card-submission-button'
         );
@@ -75,8 +98,12 @@
             // disable the submit button as we await tokenization and make a payment request.
             cardSubmissionButton.disabled = true;
             const token = await tokenize(card);
+            const verificationToken = await verifyBuyer(payments, token);
 
-            const paymentResults = await createPayment(token);
+            const paymentResults = await createPayment(
+              token,
+              verificationToken
+            );
 
             console.debug('Payment Success', paymentResults);
           } catch (e) {
