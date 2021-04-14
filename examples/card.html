@@ -72,7 +72,7 @@
           event.preventDefault();
 
           try {
-            // disable the submit button as we await tokenization and making a payment request.
+            // disable the submit button as we await tokenization and make a payment request.
             cardSubmissionButton.disabled = true;
             const token = await tokenize(card);
 
