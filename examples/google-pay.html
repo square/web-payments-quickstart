@@ -102,7 +102,6 @@
             // disable the submit button as we await tokenization and make a payment request.
             cardSubmissionButton.disabled = true;
             const token = await tokenize(paymentMethod);
-
             const paymentResults = await createPayment(token);
 
             console.debug('Payment Success', paymentResults);
