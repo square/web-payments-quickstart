@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="app.css" rel="stylesheet" />
+    <script
+      type="text/javascript"
+      src="https://sandbox.web.squarecdn.com/v0.1/square.js"
+    ></script>
+    <script>
+      const appId = '{APPLICATION_ID}';
+      const locationId = '{LOCATION_ID}';
+
+      async function initializeCard(payments) {
+        const card = await payments.card();
+        await card.attach('#card-container');
+
+        return card;
+      }
+
+      function buildPaymentRequest(payments) {
+        // Checkpoint 1
+        const defaultShippingOptions = [
+          {
+            amount: '0.00',
+            id: 'shipping-option-1',
+            label: 'Free',
+          },
+          {
+            amount: '10.00',
+            id: 'shipping-option-2',
+            label: 'Expedited',
+          },
+        ];
+
+        let lineItems = [
+          { amount: '2.00', label: 'Item Cost', pending: false },
+          { amount: '0.00', label: 'Shipping', pending: false },
+          { amount: '0.00', label: 'Tax', pending: false },
+        ];
+
+        let total = calculateTotal(lineItems);
+
+        const paymentRequestDetails = {
+          countryCode: 'US',
+          currencyCode: 'USD',
+          lineItems,
+          requestBillingContact: true,
+          requestShippingContact: true,
+          shippingOptions: defaultShippingOptions,
+          total,
+        };
+
+        const req = payments.paymentRequest(paymentRequestDetails);
+
+        // Checkpoint 2
+        req.addEventListener('shippingoptionchanged', (option, update) => {
+          // Add your business logic here.
+          // This tells you the shipping options selected by the buyer, and allows you to update
+          // totals based on the pricing of each shipping option.
+          const newLineItems = updateOrAddLineItems(lineItems, {
+            Shipping: option.amount,
+          });
+          const total = calculateTotal(newLineItems);
+
+          // We want to update the line items it can be referenced later in other eventListener calls.
+          lineItems = newLineItems;
+
+          // Calling update is required.
+          update({
+            lineItems,
+            total,
+          });
+        });
+
+        // Checkpoint 3
+        req.addEventListener('shippingcontactchanged', (contact, update) => {
+          // Add your business logic here.
+          // This tells you the address of the buyer, and allows you to update your shipping options
+          // and pricing based on their location.
+          const isCA = contact.state === 'CA';
+
+          const newShippingOptions = isCA
+            ? defaultShippingOptions
+            : [
+                {
+                  id: 'shipping-options-3',
+                  label: 'Standard Shipping',
+                  amount: '15.00',
+                },
+                {
+                  id: 'shipping-options-4',
+                  label: 'Express Shipping',
+                  amount: '25.00',
+                },
+              ];
+
+          const taxableItem = lineItems.find((lineItem) => {
+            return lineItem.label === 'Item Cost';
+          });
+
+          const tax = calculateTax(taxableItem.amount, contact.state);
+          // Whenever the shipping contact is changed, the shipping option defaults to the
+          // first option. This will lead to the shippingoptionchanged event being emitted for
+          // each contact change when if shipping address is required.
+          const newLineItems = updateOrAddLineItems(lineItems, { Tax: tax });
+
+          total = calculateTotal(newLineItems);
+          lineItems = newLineItems;
+
+          update({
+            lineItems: newLineItems,
+            shippingOptions: newShippingOptions,
+            total,
+          });
+        });
+
+        return req;
+      }
+
+      function calculateTotal(lineItems) {
+        const amount = lineItems
+          .reduce((total, lineItem) => {
+            return total + parseFloat(lineItem.amount);
+          }, 0.0)
+          .toFixed(2);
+
+        return { amount, label: 'Total', pending: false };
+      }
+
+      // newAmountByLabel will be in the format of { labelName: amount }, e.g. { 'Shipping':'10.00', 'Tax':'3.00' }
+      function updateOrAddLineItems(currentLineItems, newAmountsByLabel) {
+        const newLineItems = currentLineItems.filter((lineItem) => {
+          // exclude any current line items that have a label that is being updated;
+          return newAmountsByLabel[lineItem.label] === undefined;
+        });
+
+        Object.entries(newAmountsByLabel).forEach(([label, amount]) => {
+          newLineItems.push({ label, amount, pending: false });
+        });
+
+        return newLineItems;
+      }
+
+      function calculateTax(amount, state) {
+        let taxPercent = 0.06;
+        // These are not accurate and are used just for example purposes.
+        switch (state) {
+          case 'CA':
+            taxPercent = 0.1;
+            break;
+          case 'GA':
+            taxPercent = 0.075;
+            break;
+          case 'MI':
+            taxPercent = 0.05;
+            break;
+        }
+
+        const taxAmount = parseFloat(amount) * taxPercent;
+        // returns a string that truncates to 2 digits, matching the format of '1.25'
+        return taxAmount.toFixed(2);
+      }
+
+      async function initializeGooglePay(payments) {
+        const paymentRequest = buildPaymentRequest(payments);
+
+        const googlePay = await payments.googlePay(paymentRequest);
+        await googlePay.attach('#google-pay-button');
+
+        return googlePay;
+      }
+
+      async function createPayment(token) {
+        const body = JSON.stringify({
+          locationId,
+          sourceId: token,
+        });
+
+        const paymentResponse = await fetch('/payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body,
+        });
+
+        if (paymentResponse.ok) {
+          return paymentResponse.json();
+        }
+
+        const errorBody = await paymentResponse.text();
+        throw new Error(errorBody);
+      }
+
+      async function tokenize(paymentMethod) {
+        const tokenResult = await paymentMethod.tokenize();
+        if (tokenResult.status === 'OK') {
+          return tokenResult.token;
+        } else {
+          let errorMessage = `Tokenization failed with status: ${tokenResult.status}`;
+          if (tokenResult.errors) {
+            errorMessage += ` and errors: ${JSON.stringify(
+              tokenResult.errors
+            )}`;
+          }
+
+          throw new Error(errorMessage);
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', async function () {
+        if (!window.Square) {
+          throw new Error('Square.js failed to load properly');
+        }
+
+        const payments = window.Square.payments(appId, locationId);
+        let card;
+        try {
+          card = await initializeCard(payments);
+        } catch (e) {
+          console.error('Initializing Card failed', e);
+          return;
+        }
+
+        let googlePay;
+        try {
+          googlePay = await initializeGooglePay(payments);
+        } catch (e) {
+          console.error('Initializing Google Pay failed', e);
+          // There are a number of reason why Google Pay may not be supported
+          // (e.g. Browser Support, Device Support, Account). Therefore you should handle
+          // initialization failures, while still loading other applicable payment methods.
+        }
+
+        const cardSubmissionButton = document.getElementById(
+          'card-submission-button'
+        );
+
+        async function handlePaymentMethodSubmission(event, paymentMethod) {
+          event.preventDefault();
+
+          try {
+            // disable the submit button as we await tokenization and make a payment request.
+            cardSubmissionButton.disabled = true;
+            const token = await tokenize(paymentMethod);
+            const paymentResults = await createPayment(token);
+
+            console.debug('Payment Success', paymentResults);
+          } catch (e) {
+            cardSubmissionButton.disabled = false;
+            console.error(e.message);
+          }
+        }
+
+        cardSubmissionButton.addEventListener('click', async function (event) {
+          await handlePaymentMethodSubmission(event, card);
+        });
+
+        // Checkpoint 2.
+        const googlePayButton = document.getElementById('google-pay-button');
+        googlePayButton.addEventListener('click', async function (event) {
+          await handlePaymentMethodSubmission(event, googlePay);
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <form id="payment-form">
+      <div id="google-pay-button"></div>
+      <div id="card-container"></div>
+      <button id="card-submission-button" type="submit">Pay $1.00</button>
+    </form>
+  </body>
+</html>
