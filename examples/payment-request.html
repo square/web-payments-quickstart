@@ -33,9 +33,9 @@
         ];
 
         let lineItems = [
-          { amount: '2.00', label: 'Item Cost', pending: false },
-          { amount: '0.00', label: 'Shipping', pending: false },
-          { amount: '0.00', label: 'Tax', pending: false },
+          { amount: '2.00', label: 'Item Cost' },
+          { amount: '0.00', label: 'Shipping' },
+          { amount: '0.00', label: 'Tax' },
         ];
 
         let total = calculateTotal(lineItems);
@@ -124,7 +124,7 @@
           }, 0.0)
           .toFixed(2);
 
-        return { amount, label: 'Total', pending: false };
+        return { amount, label: 'Total' };
       }
 
       // newAmountByLabel will be in the format of { labelName: amount }, e.g. { 'Shipping':'10.00', 'Tax':'3.00' }
@@ -135,7 +135,7 @@
         });
 
         Object.entries(newAmountsByLabel).forEach(([label, amount]) => {
-          newLineItems.push({ label, amount, pending: false });
+          newLineItems.push({ label, amount });
         });
 
         return newLineItems;
