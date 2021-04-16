@@ -17,8 +17,8 @@
         return card;
       }
 
-      async function initializeGooglePay(payments) {
-        const paymentRequest = payments.paymentRequest({
+      function buildPaymentRequest(payments) {
+        return payments.paymentRequest({
           countryCode: 'US',
           currencyCode: 'USD',
           total: {
@@ -26,7 +26,10 @@
             label: 'Total',
           },
         });
+      }
 
+      async function initializeGooglePay(payments) {
+        const paymentRequest = buildPaymentRequest(payments);
         const googlePay = await payments.googlePay(paymentRequest);
         await googlePay.attach('#google-pay-button');
 

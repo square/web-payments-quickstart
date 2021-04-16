@@ -27,8 +27,8 @@
         return card;
       }
 
-      async function initializeApplePay(payments) {
-        const paymentRequest = payments.paymentRequest({
+      function buildPaymentRequest(payments) {
+        return payments.paymentRequest({
           countryCode: 'US',
           currencyCode: 'USD',
           total: {
@@ -36,7 +36,10 @@
             label: 'Total',
           },
         });
+      }
 
+      async function initializeApplePay(payments) {
+        const paymentRequest = buildPaymentRequest(payments);
         const applePay = await payments.applePay(paymentRequest);
         // Note: You do not need to `attach` applePay.
         return applePay;
