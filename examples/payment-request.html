@@ -129,13 +129,25 @@
 
       // newAmountByLabel will be in the format of { labelName: amount }, e.g. { 'Shipping':'10.00', 'Tax':'3.00' }
       function updateOrAddLineItems(currentLineItems, newAmountsByLabel) {
-        const newLineItems = currentLineItems.filter((lineItem) => {
-          // exclude any current line items that have a label that is being updated;
-          return newAmountsByLabel[lineItem.label] === undefined;
+        // A list  of which newAmounts labels exist in the current line items.
+        const updatedLineItem = new Set();
+
+        // set the new amount for the line items that need to be updated.
+        const newLineItems = currentLineItems.map((lineItem) => {
+          updatedLineItem.add(lineItem.label);
+          if (newAmountsByLabel[lineItem.label] !== undefined) {
+            return Object.assign({}, lineItem, {
+              amount: newAmountsByLabel[lineItem.label],
+            });
+          }
+          return lineItem;
         });
 
+        // for line items that were not updated, add them to the new lineItem list.
         Object.entries(newAmountsByLabel).forEach(([label, amount]) => {
-          newLineItems.push({ label, amount });
+          if (!updatedLineItem.has(label)) {
+            newLineItems.push({ label, amount, pending: false });
+          }
         });
 
         return newLineItems;
