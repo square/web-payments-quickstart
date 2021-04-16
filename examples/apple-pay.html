@@ -132,10 +132,12 @@
         });
 
         // Checkpoint 2.
-        const applePayButton = document.getElementById('apple-pay-button');
-        applePayButton.addEventListener('click', async function (event) {
-          await handlePaymentMethodSubmission(event, applePay);
-        });
+        if (applePay) {
+          const applePayButton = document.getElementById('apple-pay-button');
+          applePayButton.addEventListener('click', async function (event) {
+            await handlePaymentMethodSubmission(event, applePay);
+          });
+        }
       });
     </script>
   </head>

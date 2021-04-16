@@ -123,10 +123,12 @@
         });
 
         // Checkpoint 2.
-        const googlePayButton = document.getElementById('google-pay-button');
-        googlePayButton.addEventListener('click', async function (event) {
-          await handlePaymentMethodSubmission(event, googlePay);
-        });
+        if (googlePay) {
+          const googlePayButton = document.getElementById('google-pay-button');
+          googlePayButton.addEventListener('click', async function (event) {
+            await handlePaymentMethodSubmission(event, googlePay);
+          });
+        }
       });
     </script>
   </head>
