@@ -2,6 +2,16 @@
 <html>
   <head>
     <link href="app.css" rel="stylesheet" />
+    <style>
+      #apple-pay-button {
+        height: 48px;
+        width: 100%;
+        display: inline-block;
+        -webkit-appearance: -apple-pay-button;
+        -apple-pay-button-type: plain;
+        -apple-pay-button-style: black;
+      }
+    </style>
     <script
       type="text/javascript"
       src="https://sandbox.web.squarecdn.com/v0.1/square.js"
@@ -17,11 +27,25 @@
         return card;
       }
 
-      async function createPayment(token, verificationToken) {
+      async function initializeApplePay(payments) {
+        const paymentRequest = payments.paymentRequest({
+          countryCode: 'US',
+          currencyCode: 'USD',
+          total: {
+            amount: '1.00',
+            label: 'Total',
+          },
+        });
+
+        const applePay = await payments.applePay(paymentRequest);
+        // Note: You do not need to `attach` applePay.
+        return applePay;
+      }
+
+      async function createPayment(token) {
         const body = JSON.stringify({
           locationId,
           sourceId: token,
-          verificationToken,
         });
 
         const paymentResponse = await fetch('/payment', {
@@ -40,45 +64,28 @@
         throw new Error(errorBody);
       }
 
-      async function tokenize(card) {
-        const tokenResult = await card.tokenize();
+      // Change the parameter to 'paymentMethod'
+      async function tokenize(paymentMethod) {
+        const tokenResult = await paymentMethod.tokenize();
         if (tokenResult.status === 'OK') {
           return tokenResult.token;
         } else {
-          throw new Error(
-            `Tokenization errors: ${JSON.stringify(tokenResult.errors)}`
-          );
+          let errorMessage = `Tokenization failed with status: ${tokenResult.status}`;
+          if (tokenResult.errors) {
+            errorMessage += ` and errors: ${JSON.stringify(
+              tokenResult.errors
+            )}`;
+          }
+
+          throw new Error(errorMessage);
         }
-      }
-
-      async function verifyBuyer(payments, token) {
-        const verificationDetails = {
-          amount: '1.00',
-          billingContact: {
-            addressLines: ['123 Main Street', 'Apartment 1'],
-            familyName: 'Doe',
-            givenName: 'John',
-            email: 'jondoe@gmail.com',
-            country: 'GB',
-            phone: '3214563987',
-            region: 'LND',
-            city: 'London',
-          },
-          currencyCode: 'GBP',
-          intent: 'CHARGE',
-        };
-
-        const verificationResults = await payments.verifyBuyer(
-          token,
-          verificationDetails
-        );
-        return verificationResults.token;
       }
 
       document.addEventListener('DOMContentLoaded', async function () {
         if (!window.Square) {
           throw new Error('Square.js failed to load properly');
         }
+
         const payments = window.Square.payments(appId, locationId);
         let card;
         try {
@@ -88,27 +95,27 @@
           return;
         }
 
-        async function handlePaymentMethodSubmission(
-          event,
-          paymentMethod,
-          shouldVerify = false
-        ) {
+        let applePay;
+        try {
+          applePay = await initializeApplePay(payments);
+        } catch (e) {
+          console.error('Initializing Apple Pay failed', e);
+          // There are a number of reason why Apple Pay may not be supported
+          // (e.g. Browser Support, Device Support, Account). Therefore you should handle
+          // initialization failures, while still loading other applicable payment methods.
+        }
+
+        const cardSubmissionButton = document.getElementById(
+          'card-submission-button'
+        );
+        async function handlePaymentMethodSubmission(event, paymentMethod) {
           event.preventDefault();
 
           try {
             // disable the submit button as we await tokenization and make a payment request.
             cardSubmissionButton.disabled = true;
             const token = await tokenize(paymentMethod);
-            const paymentOptions = { token };
-
-            if (shouldVerify) {
-              paymentOptions.verificationToken = await verifyBuyer(
-                payments,
-                token
-              );
-            }
-
-            const paymentResults = await createPayment(paymentOptions);
+            const paymentResults = await createPayment(token);
 
             console.debug('Payment Success', paymentResults);
           } catch (e) {
@@ -117,18 +124,21 @@
           }
         }
 
-        const cardSubmissionButton = document.getElementById(
-          'card-submission-button'
-        );
         cardSubmissionButton.addEventListener('click', async function (event) {
-          // SCA only needs to be run for Card Payments. All other payment methods can be set to false.
-          handlePaymentMethodSubmission(event, cardSubmissionButton, true);
+          await handlePaymentMethodSubmission(event, card);
+        });
+
+        // Checkpoint 2.
+        const applePayButton = document.getElementById('apple-pay-button');
+        applePayButton.addEventListener('click', async function (event) {
+          await handlePaymentMethodSubmission(event, applePay);
         });
       });
     </script>
   </head>
   <body>
     <form id="payment-form">
+      <div id="apple-pay-button"></div>
       <div id="card-container"></div>
       <button id="card-submission-button" type="submit">Pay $1.00</button>
     </form>

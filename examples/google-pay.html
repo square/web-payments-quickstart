@@ -55,15 +55,19 @@
         throw new Error(errorBody);
       }
 
-      // Change the parameter to 'paymentMethod'
       async function tokenize(paymentMethod) {
         const tokenResult = await paymentMethod.tokenize();
         if (tokenResult.status === 'OK') {
           return tokenResult.token;
         } else {
-          throw new Error(
-            `Tokenization errors: ${JSON.stringify(tokenResult.errors)}`
-          );
+          let errorMessage = `Tokenization failed with status: ${tokenResult.status}`;
+          if (tokenResult.errors) {
+            errorMessage += ` and errors: ${JSON.stringify(
+              tokenResult.errors
+            )}`;
+          }
+
+          throw new Error(errorMessage);
         }
       }
 
