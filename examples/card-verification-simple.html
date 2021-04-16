@@ -88,28 +88,41 @@
           return;
         }
 
-        const cardSubmissionButton = document.getElementById(
-          'card-submission-button'
-        );
-        cardSubmissionButton.addEventListener('click', async function (event) {
+        async function handlePaymentMethodSubmission(
+          event,
+          paymentMethod,
+          shouldVerify = false
+        ) {
           event.preventDefault();
 
           try {
             // disable the submit button as we await tokenization and make a payment request.
             cardSubmissionButton.disabled = true;
-            const token = await tokenize(card);
-            const verificationToken = await verifyBuyer(payments, token);
+            const token = await tokenize(paymentMethod);
+            const paymentOptions = { token };
 
-            const paymentResults = await createPayment(
-              token,
-              verificationToken
-            );
+            if (shouldVerify) {
+              paymentOptions.verificationToken = await verifyBuyer(
+                payments,
+                token
+              );
+            }
+
+            const paymentResults = await createPayment(paymentOptions);
 
             console.debug('Payment Success', paymentResults);
           } catch (e) {
             cardSubmissionButton.disabled = false;
             console.error(e.message);
           }
+        }
+
+        const cardSubmissionButton = document.getElementById(
+          'card-submission-button'
+        );
+        cardSubmissionButton.addEventListener('click', async function (event) {
+          // SCA only needs to be run for Card Payments. All other payment methods can be set to false.
+          handlePaymentMethodSubmission(event, cardSubmissionButton, true);
         });
       });
     </script>
