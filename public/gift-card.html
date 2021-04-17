@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="app.css" rel="stylesheet" />
+    <script
+      type="text/javascript"
+      src="https://sandbox.web.squarecdn.com/v0.1/square.js"
+    ></script>
+    <script>
+      const appId = 'sandbox-sq0idb-zoKXRPP-_XvokNHQgKPLzA';
+      const locationId = 'B6DYCFP87487T';
+
+      async function initializeCard(payments) {
+        const card = await payments.card();
+        await card.attach('#card-container');
+
+        return card;
+      }
+
+      async function initializeGiftCard(payments) {
+        const giftCard = await payments.giftCard();
+        await giftCard.attach('#gift-card-container');
+
+        return giftCard;
+      }
+
+      async function createPayment(token) {
+        const body = JSON.stringify({
+          locationId,
+          sourceId: token,
+        });
+
+        const paymentResponse = await fetch('/payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body,
+        });
+
+        if (paymentResponse.ok) {
+          return paymentResponse.json();
+        }
+
+        const errorBody = await paymentResponse.text();
+        throw new Error(errorBody);
+      }
+
+      async function tokenize(paymentMethod) {
+        const tokenResult = await paymentMethod.tokenize();
+        if (tokenResult.status === 'OK') {
+          return tokenResult.token;
+        } else {
+          let errorMessage = `Tokenization failed with status: ${tokenResult.status}`;
+          if (tokenResult.errors) {
+            errorMessage += ` and errors: ${JSON.stringify(
+              tokenResult.errors
+            )}`;
+          }
+
+          throw new Error(errorMessage);
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', async function () {
+        if (!window.Square) {
+          throw new Error('Square.js failed to load properly');
+        }
+
+        const payments = window.Square.payments(appId, locationId);
+        let card;
+        try {
+          card = await initializeCard(payments);
+        } catch (e) {
+          console.error('Initializing Card failed', e);
+          return;
+        }
+
+        let giftCard;
+        try {
+          giftCard = await initializeGiftCard(payments);
+        } catch (e) {
+          console.error('Initializing Gift Card failed', e);
+        }
+
+        // Checkpoint 2.
+        async function handlePaymentMethodSubmission(event, paymentMethod) {
+          event.preventDefault();
+
+          try {
+            // disable the submit button as we await tokenization and make a payment request.
+            cardSubmissionButton.disabled = true;
+            giftCardSubmissionButton.disabled = true;
+            const token = await tokenize(paymentMethod);
+            const paymentResults = await createPayment(token);
+
+            console.debug('Payment Success', paymentResults);
+          } catch (e) {
+            cardSubmissionButton.disabled = false;
+            giftCardSubmissionButton.disabled = false;
+            console.error(e.message);
+          }
+        }
+
+        const cardSubmissionButton = document.getElementById(
+          'card-submission-button'
+        );
+        cardSubmissionButton.addEventListener('click', async function (event) {
+          await handlePaymentMethodSubmission(event, card);
+        });
+
+        const giftCardSubmissionButton = document.getElementById(
+          'gift-card-submission-button'
+        );
+        giftCardSubmissionButton.addEventListener(
+          'click',
+          async function (event) {
+            await handlePaymentMethodSubmission(event, giftCard);
+          }
+        );
+      });
+    </script>
+  </head>
+  <body>
+    <form id="payment-form">
+      <div id="card-container"></div>
+      <button id="card-submission-button">Pay $1.00</button>
+
+      <div id="gift-card-container"></div>
+      <button id="gift-card-submission-button">Pay with Gift Card</button>
+    </form>
+  </body>
+</html>

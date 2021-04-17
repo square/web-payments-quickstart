@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="app.css" rel="stylesheet" />
+    <script
+      type="text/javascript"
+      src="https://sandbox.web.squarecdn.com/v0.1/square.js"
+    ></script>
+    <script>
+      const appId = 'sandbox-sq0idb-zoKXRPP-_XvokNHQgKPLzA';
+      const locationId = 'B6DYCFP87487T';
+
+      async function initializeCard(payments) {
+        const card = await payments.card();
+        await card.attach('#card-container');
+
+        return card;
+      }
+
+      // verificationToken can be undefined, as it does not apply to all payment methods.
+      async function createPayment(token, verificationToken) {
+        const bodyParameters = {
+          locationId,
+          sourceId: token,
+        };
+
+        if (verificationToken !== undefined) {
+          bodyParameters.verificationToken = verificationToken;
+        }
+
+        const body = JSON.stringify(bodyParameters);
+
+        const paymentResponse = await fetch('/payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body,
+        });
+
+        if (paymentResponse.ok) {
+          return paymentResponse.json();
+        }
+
+        const errorBody = await paymentResponse.text();
+        throw new Error(errorBody);
+      }
+
+      async function tokenize(paymentMethod) {
+        const tokenResult = await paymentMethod.tokenize();
+        if (tokenResult.status === 'OK') {
+          return tokenResult.token;
+        } else {
+          throw new Error(
+            `Tokenization errors: ${JSON.stringify(tokenResult.errors)}`
+          );
+        }
+      }
+
+      async function verifyBuyer(payments, token) {
+        const verificationDetails = {
+          amount: '1.00',
+          billingContact: {
+            addressLines: ['123 Main Street', 'Apartment 1'],
+            familyName: 'Doe',
+            givenName: 'John',
+            email: 'jondoe@gmail.com',
+            country: 'GB',
+            phone: '3214563987',
+            region: 'LND',
+            city: 'London',
+          },
+          currencyCode: 'GBP',
+          intent: 'CHARGE',
+        };
+
+        const verificationResults = await payments.verifyBuyer(
+          token,
+          verificationDetails
+        );
+        return verificationResults.token;
+      }
+
+      document.addEventListener('DOMContentLoaded', async function () {
+        if (!window.Square) {
+          throw new Error('Square.js failed to load properly');
+        }
+        const payments = window.Square.payments(appId, locationId);
+        let card;
+        try {
+          card = await initializeCard(payments);
+        } catch (e) {
+          console.error('Initializing Card failed', e);
+          return;
+        }
+
+        async function handlePaymentMethodSubmission(
+          event,
+          paymentMethod,
+          shouldVerify = false
+        ) {
+          event.preventDefault();
+
+          try {
+            // disable the submit button as we await tokenization and make a payment request.
+            cardSubmissionButton.disabled = true;
+            const token = await tokenize(paymentMethod);
+            let verificationToken;
+
+            if (shouldVerify) {
+              verificationToken = await verifyBuyer(payments, token);
+            }
+
+            const paymentResults = await createPayment(
+              token,
+              verificationToken
+            );
+
+            console.debug('Payment Success', paymentResults);
+          } catch (e) {
+            cardSubmissionButton.disabled = false;
+            console.error(e.message);
+          }
+        }
+
+        const cardSubmissionButton = document.getElementById(
+          'card-submission-button'
+        );
+        cardSubmissionButton.addEventListener('click', async function (event) {
+          // SCA only needs to be run for Card Payments. All other payment methods can be set to false.
+          handlePaymentMethodSubmission(event, card, true);
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <form id="payment-form">
+      <div id="card-container"></div>
+      <button id="card-submission-button" type="submit">Pay $1.00</button>
+    </form>
+  </body>
+</html>
