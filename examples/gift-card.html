@@ -10,13 +10,6 @@
       const appId = '{APPLICATION_ID}';
       const locationId = '{LOCATION_ID}';
 
-      async function initializeCard(payments) {
-        const card = await payments.card();
-        await card.attach('#card-container');
-
-        return card;
-      }
-
       async function initializeGiftCard(payments) {
         const giftCard = await payments.giftCard();
         await giftCard.attach('#gift-card-container');
@@ -68,14 +61,6 @@
         }
 
         const payments = window.Square.payments(appId, locationId);
-        let card;
-        try {
-          card = await initializeCard(payments);
-        } catch (e) {
-          console.error('Initializing Card failed', e);
-          return;
-        }
-
         let giftCard;
         try {
           giftCard = await initializeGiftCard(payments);
@@ -89,25 +74,16 @@
 
           try {
             // disable the submit button as we await tokenization and make a payment request.
-            cardSubmissionButton.disabled = true;
             giftCardSubmissionButton.disabled = true;
             const token = await tokenize(paymentMethod);
             const paymentResults = await createPayment(token);
 
             console.debug('Payment Success', paymentResults);
           } catch (e) {
-            cardSubmissionButton.disabled = false;
             giftCardSubmissionButton.disabled = false;
             console.error(e.message);
           }
         }
-
-        const cardSubmissionButton = document.getElementById(
-          'card-submission-button'
-        );
-        cardSubmissionButton.addEventListener('click', async function (event) {
-          await handlePaymentMethodSubmission(event, card);
-        });
 
         const giftCardSubmissionButton = document.getElementById(
           'gift-card-submission-button'
@@ -123,9 +99,6 @@
   </head>
   <body>
     <form id="payment-form">
-      <div id="card-container"></div>
-      <button id="card-submission-button">Pay $1.00</button>
-
       <div id="gift-card-container"></div>
       <button id="gift-card-submission-button">Pay with Gift Card</button>
     </form>
