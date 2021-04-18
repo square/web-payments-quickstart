@@ -16,6 +16,9 @@ body {
   display: flex;
   gap: 20px;
   justify-content: space-between;
+  border: none;
+  margin: 0;
+  padding: 0;
 }
 
 #card-container {
