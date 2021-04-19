@@ -65,6 +65,13 @@
         };
       }
 
+      function getACHOptions(form) {
+        const billingContact = getBillingContact(form);
+        const accountHolderName = `${billingContact.givenName} ${billingContact.familyName}`;
+
+        return { accountHolderName };
+      }
+
       document.addEventListener('DOMContentLoaded', async function () {
         if (!window.Square) {
           throw new Error('Square.js failed to load properly');
@@ -75,7 +82,7 @@
         try {
           ach = await initializeACH(payments);
         } catch (e) {
-          console.error('Initializing Card failed', e);
+          console.error('Initializing ACH failed', e);
           return;
         }
 
@@ -102,11 +109,8 @@
         const achButton = document.getElementById('ach-button');
         achButton.addEventListener('click', async function (event) {
           const paymentForm = document.getElementById('payment-form');
-          const billingContact = getBillingContact(paymentForm);
-          const accountHolderName = `${billingContact.givenName} ${billingContact.familyName}`;
-          await handlePaymentMethodSubmission(event, ach, {
-            accountHolderName,
-          });
+          const achOptions = getACHOptions(paymentForm);
+          await handlePaymentMethodSubmission(event, ach, achOptions);
         });
       });
     </script>
@@ -116,20 +120,24 @@
       <fieldset class="buyer-inputs">
         <input
           type="text"
+          autocomplete="given-name"
           aria-required="true"
           aria-label="First Name"
           required="required"
           placeholder="Given Name"
           name="givenName"
+          spellcheck="false"
         />
 
         <input
           type="text"
+          autocomplete="family-name"
           aria-required="true"
           aria-label="Last Name"
           required="required"
           placeholder="Family Name"
           name="familyName"
+          spellcheck="false"
         />
       </fieldset>
       <button id="ach-button">Pay with Bank Account</button>
