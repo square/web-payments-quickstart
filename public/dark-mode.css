@@ -5,3 +5,16 @@
 .dark-mode button {
   background-color: #006aff;
 }
+
+.dark-mode #payment-status-container.is-success:after {
+  color: #ffffff;
+}
+
+.dark-mode #payment-status-container.is-failure:after {
+  color: #ffffff;
+}
+
+.dark-mode #payment-status-container {
+  background-color: #2d2d2d;
+  border-color: #2d2d2d;
+}

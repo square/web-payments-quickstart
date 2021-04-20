@@ -74,6 +74,22 @@
         }
       }
 
+      // status is either SUCCESS or FAILURE;
+      function displayPaymentResults(status) {
+        const statusContainer = document.getElementById(
+          'payment-status-container'
+        );
+        if (status === 'SUCCESS') {
+          statusContainer.classList.remove('is-failure');
+          statusContainer.classList.add('is-success');
+        } else {
+          statusContainer.classList.remove('is-success');
+          statusContainer.classList.add('is-failure');
+        }
+
+        statusContainer.style.visibility = 'visible';
+      }
+
       document.addEventListener('DOMContentLoaded', async function () {
         if (!window.Square) {
           throw new Error('Square.js failed to load properly');
@@ -98,27 +114,26 @@
           // initialization failures, while still loading other applicable payment methods.
         }
 
-        const cardSubmissionButton = document.getElementById(
-          'card-submission-button'
-        );
-
         async function handlePaymentMethodSubmission(event, paymentMethod) {
           event.preventDefault();
 
           try {
             // disable the submit button as we await tokenization and make a payment request.
-            cardSubmissionButton.disabled = true;
+            cardButton.disabled = true;
             const token = await tokenize(paymentMethod);
             const paymentResults = await createPayment(token);
+            displayPaymentResults('SUCCESS');
 
             console.debug('Payment Success', paymentResults);
           } catch (e) {
-            cardSubmissionButton.disabled = false;
+            cardButton.disabled = false;
+            displayPaymentResults('FAILURE');
             console.error(e.message);
           }
         }
 
-        cardSubmissionButton.addEventListener('click', async function (event) {
+        const cardButton = document.getElementById('card-button');
+        cardButton.addEventListener('click', async function (event) {
           await handlePaymentMethodSubmission(event, card);
         });
 
@@ -136,7 +151,8 @@
     <form id="payment-form">
       <div id="google-pay-button"></div>
       <div id="card-container"></div>
-      <button id="card-submission-button" type="submit">Pay $1.00</button>
+      <button id="card-button" type="button">Pay $1.00</button>
     </form>
+    <div id="payment-status-container"></div>
   </body>
 </html>

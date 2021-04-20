@@ -57,6 +57,22 @@
         }
       }
 
+      // status is either SUCCESS or FAILURE;
+      function displayPaymentResults(status) {
+        const statusContainer = document.getElementById(
+          'payment-status-container'
+        );
+        if (status === 'SUCCESS') {
+          statusContainer.classList.remove('is-failure');
+          statusContainer.classList.add('is-success');
+        } else {
+          statusContainer.classList.remove('is-success');
+          statusContainer.classList.add('is-failure');
+        }
+
+        statusContainer.style.visibility = 'visible';
+      }
+
       async function verifyBuyer(payments, token) {
         const verificationDetails = {
           amount: '1.00',
@@ -103,7 +119,7 @@
 
           try {
             // disable the submit button as we await tokenization and make a payment request.
-            cardSubmissionButton.disabled = true;
+            cardButton.disabled = true;
             const token = await tokenize(paymentMethod);
             let verificationToken;
 
@@ -116,17 +132,17 @@
               verificationToken
             );
 
+            displayPaymentResults('SUCCESS');
             console.debug('Payment Success', paymentResults);
           } catch (e) {
-            cardSubmissionButton.disabled = false;
+            cardButton.disabled = false;
+            displayPaymentResults('FAILURE');
             console.error(e.message);
           }
         }
 
-        const cardSubmissionButton = document.getElementById(
-          'card-submission-button'
-        );
-        cardSubmissionButton.addEventListener('click', async function (event) {
+        const cardButton = document.getElementById('card-button');
+        cardButton.addEventListener('click', async function (event) {
           // SCA only needs to be run for Card Payments. All other payment methods can be set to false.
           handlePaymentMethodSubmission(event, card, true);
         });
@@ -136,7 +152,8 @@
   <body>
     <form id="payment-form">
       <div id="card-container"></div>
-      <button id="card-submission-button" type="submit">Pay $1.00</button>
+      <button id="card-button" type="button">Pay $1.00</button>
     </form>
+    <div id="payment-status-container"></div>
   </body>
 </html>
