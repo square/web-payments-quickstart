@@ -10,6 +10,13 @@
       const appId = '{APPLICATION_ID}';
       const locationId = '{LOCATION_ID}';
 
+      async function initializeCard(payments) {
+        const card = await payments.card();
+        await card.attach('#card-container');
+
+        return card;
+      }
+
       async function initializeGiftCard(payments) {
         const giftCard = await payments.giftCard();
         await giftCard.attach('#gift-card-container');
@@ -77,6 +84,14 @@
         }
 
         const payments = window.Square.payments(appId, locationId);
+
+        let card;
+        try {
+          card = await initializeCard(payments);
+        } catch (e) {
+          console.error('Initializing Gift Card failed', e);
+        }
+
         let giftCard;
         try {
           giftCard = await initializeGiftCard(payments);
@@ -90,6 +105,7 @@
 
           try {
             // disable the submit button as we await tokenization and make a payment request.
+            cardButton.disabled = true;
             giftCardButton.disabled = true;
             const token = await tokenize(paymentMethod);
             const paymentResults = await createPayment(token);
@@ -97,11 +113,17 @@
 
             console.debug('Payment Success', paymentResults);
           } catch (e) {
+            cardButton.disabled = false;
             giftCardButton.disabled = false;
             displayPaymentResults('FAILURE');
             console.error(e.message);
           }
         }
+
+        const cardButton = document.getElementById('card-button');
+        cardButton.addEventListener('click', async function (event) {
+          await handlePaymentMethodSubmission(event, card);
+        });
 
         const giftCardButton = document.getElementById('gift-card-button');
         giftCardButton.addEventListener('click', async function (event) {
@@ -114,6 +136,9 @@
     <form id="payment-form">
       <div id="gift-card-container"></div>
       <button id="gift-card-button" type="button">Pay with Gift Card</button>
+
+      <div id="card-container"></div>
+      <button id="card-button" type="button">Pay $1.00</button>
     </form>
     <div id="payment-status-container"></div>
   </body>
