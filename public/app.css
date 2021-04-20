@@ -114,6 +114,7 @@ button:disabled {
 #payment-status-container.is-success:after {
   content: 'Payment successful';
   font-size: 14px;
+  line-height: 16px;
 }
 
 #payment-status-container.is-failure:before {
@@ -129,4 +130,5 @@ button:disabled {
 #payment-status-container.is-failure:after {
   content: 'Payment failed';
   font-size: 14px;
+  line-height: 16px;
 }
