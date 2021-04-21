@@ -22,7 +22,7 @@ body {
 }
 
 #card-container {
-  margin-top: 20px;
+  margin-top: 45px;
   /* this height depends on the size of the container element */
   /* We transition from a single row to double row at 485px */
   /* Settting this min-height minimizes the impact of the card form loading */
@@ -30,7 +30,7 @@ body {
 }
 
 #gift-card-container {
-  margin-top: 20px;
+  margin-top: 45px;
   min-height: 90px;
 }
 
