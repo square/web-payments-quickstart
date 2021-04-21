@@ -19,7 +19,7 @@ async function createPayment(req, res) {
   const payload = await json(req);
   logger.debug(JSON.stringify(payload));
   // We validate the payload for specific fields. You may disable this feature
-  // if you would prefer to use
+  // if you would prefer to handle payload validation on your own.
   if (!validatePaymentPayload(payload)) {
     throw createError(400, 'Bad Request');
   }
