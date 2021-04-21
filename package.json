@@ -2,7 +2,7 @@
   "name": "@square/web-payments-quickstart",
   "version": "1.0.0",
   "description": "Quickstart for using Square's Web Payments SDK",
-  "main": "index.js",
+  "main": "server.js",
   "private": true,
   "scripts": {
     "start": "NODE_ENV=production micro --listen tcp://0.0.0.0:${PORT-3000}",
