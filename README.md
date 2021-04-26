@@ -14,7 +14,9 @@ git clone https://github.com/square/web-payments-quickstart
 cd web-payments-quickstart
 ```
 
-Install Node.js (>= v10.4) which will include `npm`, and use `npm` to install development dependencies.
+Install Node.js (>= v14) which will include `npm`. This repository contains an `.nvmrc` file if you use [`nvm`](https://github.com/nvm-sh/nvm) to manage your node versions.
+
+Then, to install dependencies run:
 
 ```sh
 npm install
