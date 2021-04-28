@@ -12,7 +12,7 @@ const main = require('.');
 // serveStatic
 [
   ['/', /Quickstart/],
-  ['/payments.js', /window.Square/],
+  ['/index.html', /sandbox\.web\.squarecdn/],
   ['/favicon.ico', /.+/],
 ].forEach(([path, re]) => {
   test(`serves ${path}`, async (t) => {
