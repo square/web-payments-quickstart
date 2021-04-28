@@ -38,7 +38,10 @@ async function createPayment(req, res) {
         // and pass the Order ID to createPayment rather than raw amounts
         // See Orders documentation: https://developer.squareup.com/docs/orders-api/what-it-does
         amountMoney: {
-          amount: '100', // the expected amount is in cents, meaning this is $1.00.
+          // the expected amount is in cents, meaning this is $1.00.
+          amount: '100',
+          // If you are a non-US account, you must change the currency to match the country in which
+          // you are accepting the payment.
           currency: 'USD',
         },
       };
