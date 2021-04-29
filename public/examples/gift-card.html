@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link href="app.css" rel="stylesheet" />
-    <link href="dark-mode.css" rel="stylesheet" />
+    <link href="../app.css" rel="stylesheet" />
     <script
       type="text/javascript"
       src="https://sandbox.web.squarecdn.com/v1/square.js"
@@ -11,49 +10,18 @@
       const appId = '{APPLICATION_ID}';
       const locationId = '{LOCATION_ID}';
 
-      const darkModeCardStyle = {
-        '.input-container': {
-          borderColor: '#2D2D2D',
-          borderRadius: '6px',
-        },
-        '.input-container.is-focus': {
-          borderColor: '#006AFF',
-        },
-        '.input-container.is-error': {
-          borderColor: '#ff1600',
-        },
-        '.message-text': {
-          color: '#999999',
-        },
-        '.message-icon': {
-          color: '#999999',
-        },
-        '.message-text.is-error': {
-          color: '#ff1600',
-        },
-        '.message-icon.is-error': {
-          color: '#ff1600',
-        },
-        input: {
-          backgroundColor: '#2D2D2D',
-          color: '#FFFFFF',
-          fontFamily: 'helvetica neue, sans-serif',
-        },
-        'input::placeholder': {
-          color: '#999999',
-        },
-        'input.is-error': {
-          color: '#ff1600',
-        },
-      };
-
       async function initializeCard(payments) {
-        const card = await payments.card({
-          style: darkModeCardStyle,
-        });
+        const card = await payments.card();
         await card.attach('#card-container');
 
         return card;
+      }
+
+      async function initializeGiftCard(payments) {
+        const giftCard = await payments.giftCard();
+        await giftCard.attach('#gift-card-container');
+
+        return giftCard;
       }
 
       async function createPayment(token) {
@@ -116,20 +84,29 @@
         }
 
         const payments = window.Square.payments(appId, locationId);
+
         let card;
         try {
           card = await initializeCard(payments);
         } catch (e) {
-          console.error('Initializing Card failed', e);
-          return;
+          console.error('Initializing Gift Card failed', e);
         }
 
+        let giftCard;
+        try {
+          giftCard = await initializeGiftCard(payments);
+        } catch (e) {
+          console.error('Initializing Gift Card failed', e);
+        }
+
+        // Checkpoint 2.
         async function handlePaymentMethodSubmission(event, paymentMethod) {
           event.preventDefault();
 
           try {
             // disable the submit button as we await tokenization and make a payment request.
             cardButton.disabled = true;
+            giftCardButton.disabled = true;
             const token = await tokenize(paymentMethod);
             const paymentResults = await createPayment(token);
             displayPaymentResults('SUCCESS');
@@ -137,6 +114,7 @@
             console.debug('Payment Success', paymentResults);
           } catch (e) {
             cardButton.disabled = false;
+            giftCardButton.disabled = false;
             displayPaymentResults('FAILURE');
             console.error(e.message);
           }
@@ -146,11 +124,19 @@
         cardButton.addEventListener('click', async function (event) {
           await handlePaymentMethodSubmission(event, card);
         });
+
+        const giftCardButton = document.getElementById('gift-card-button');
+        giftCardButton.addEventListener('click', async function (event) {
+          await handlePaymentMethodSubmission(event, giftCard);
+        });
       });
     </script>
   </head>
-  <body class="dark-mode">
+  <body>
     <form id="payment-form">
+      <div id="gift-card-container"></div>
+      <button id="gift-card-button" type="button">Pay with Gift Card</button>
+
       <div id="card-container"></div>
       <button id="card-button" type="button">Pay $1.00</button>
     </form>

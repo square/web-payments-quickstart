@@ -3,7 +3,7 @@
 }
 
 body {
-  font-family: 'Square Market', Arial, sans-serif;
+  font-family: Arial, sans-serif;
 }
 
 #payment-form {
@@ -42,6 +42,38 @@ body {
 
 #ach-button {
   margin-top: 20px;
+}
+
+#landing-page-layout {
+  width: 80%;
+  margin: 150px auto;
+  max-width: 1000px;
+}
+
+#its-working {
+  color: #737373;
+}
+
+#example-container {
+  width: 100%;
+  border: 1px solid #b3b3b3;
+  padding: 48px;
+  margin: 32px 0;
+  border-radius: 12px;
+}
+
+#example-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+h3 {
+  margin: 0;
+}
+
+p {
+  line-height: 24px;
 }
 
 label {
