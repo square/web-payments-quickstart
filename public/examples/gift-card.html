@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link href="app.css" rel="stylesheet" />
+    <link href="/app.css" rel="stylesheet" />
     <script
       type="text/javascript"
       src="https://sandbox.web.squarecdn.com/v1/square.js"
@@ -17,11 +17,11 @@
         return card;
       }
 
-      async function initializeACH(payments) {
-        const ach = await payments.ach();
-        // Note: ACH does not have an .attach(...) method
-        // the ACH auth flow is triggered by .tokenize(...)
-        return ach;
+      async function initializeGiftCard(payments) {
+        const giftCard = await payments.giftCard();
+        await giftCard.attach('#gift-card-container');
+
+        return giftCard;
       }
 
       async function createPayment(token) {
@@ -46,8 +46,8 @@
         throw new Error(errorBody);
       }
 
-      async function tokenize(paymentMethod, options = {}) {
-        const tokenResult = await paymentMethod.tokenize(options);
+      async function tokenize(paymentMethod) {
+        const tokenResult = await paymentMethod.tokenize();
         if (tokenResult.status === 'OK') {
           return tokenResult.token;
         } else {
@@ -78,23 +78,6 @@
         statusContainer.style.visibility = 'visible';
       }
 
-      function getBillingContact(form) {
-        const formData = new FormData(form);
-        // It is expected that the developer performs form field validation
-        // which does not occur in this example.
-        return {
-          givenName: formData.get('givenName'),
-          familyName: formData.get('familyName'),
-        };
-      }
-
-      function getACHOptions(form) {
-        const billingContact = getBillingContact(form);
-        const accountHolderName = `${billingContact.givenName} ${billingContact.familyName}`;
-
-        return { accountHolderName };
-      }
-
       document.addEventListener('DOMContentLoaded', async function () {
         if (!window.Square) {
           throw new Error('Square.js failed to load properly');
@@ -106,37 +89,32 @@
         try {
           card = await initializeCard(payments);
         } catch (e) {
-          console.error('Initializing Card failed', e);
-          return;
+          console.error('Initializing Gift Card failed', e);
         }
 
-        let ach;
+        let giftCard;
         try {
-          ach = await initializeACH(payments);
+          giftCard = await initializeGiftCard(payments);
         } catch (e) {
-          console.error('Initializing ACH failed', e);
-          return;
+          console.error('Initializing Gift Card failed', e);
         }
 
-        async function handlePaymentMethodSubmission(
-          event,
-          paymentMethod,
-          options
-        ) {
+        // Checkpoint 2.
+        async function handlePaymentMethodSubmission(event, paymentMethod) {
           event.preventDefault();
 
           try {
             // disable the submit button as we await tokenization and make a payment request.
             cardButton.disabled = true;
-            achButton.disabled = true;
-            const token = await tokenize(paymentMethod, options);
+            giftCardButton.disabled = true;
+            const token = await tokenize(paymentMethod);
             const paymentResults = await createPayment(token);
             displayPaymentResults('SUCCESS');
 
             console.debug('Payment Success', paymentResults);
           } catch (e) {
             cardButton.disabled = false;
-            achButton.disabled = false;
+            giftCardButton.disabled = false;
             displayPaymentResults('FAILURE');
             console.error(e.message);
           }
@@ -147,41 +125,17 @@
           await handlePaymentMethodSubmission(event, card);
         });
 
-        const achButton = document.getElementById('ach-button');
-        achButton.addEventListener('click', async function (event) {
-          const paymentForm = document.getElementById('payment-form');
-          const achOptions = getACHOptions(paymentForm);
-          await handlePaymentMethodSubmission(event, ach, achOptions);
+        const giftCardButton = document.getElementById('gift-card-button');
+        giftCardButton.addEventListener('click', async function (event) {
+          await handlePaymentMethodSubmission(event, giftCard);
         });
       });
     </script>
   </head>
   <body>
     <form id="payment-form">
-      <fieldset class="buyer-inputs">
-        <input
-          type="text"
-          autocomplete="given-name"
-          aria-required="true"
-          aria-label="First Name"
-          required="required"
-          placeholder="Given Name"
-          name="givenName"
-          spellcheck="false"
-        />
-
-        <input
-          type="text"
-          autocomplete="family-name"
-          aria-required="true"
-          aria-label="Last Name"
-          required="required"
-          placeholder="Family Name"
-          name="familyName"
-          spellcheck="false"
-        />
-      </fieldset>
-      <button id="ach-button" type="button">Pay with Bank Account</button>
+      <div id="gift-card-container"></div>
+      <button id="gift-card-button" type="button">Pay with Gift Card</button>
 
       <div id="card-container"></div>
       <button id="card-button" type="button">Pay $1.00</button>

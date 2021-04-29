@@ -1,17 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link href="app.css" rel="stylesheet" />
-    <style>
-      #apple-pay-button {
-        height: 48px;
-        width: 100%;
-        display: inline-block;
-        -webkit-appearance: -apple-pay-button;
-        -apple-pay-button-type: plain;
-        -apple-pay-button-style: black;
-      }
-    </style>
+    <link href="/app.css" rel="stylesheet" />
+    <link href="/dark-mode.css" rel="stylesheet" />
     <script
       type="text/javascript"
       src="https://sandbox.web.squarecdn.com/v1/square.js"
@@ -20,29 +11,49 @@
       const appId = '{APPLICATION_ID}';
       const locationId = '{LOCATION_ID}';
 
+      const darkModeCardStyle = {
+        '.input-container': {
+          borderColor: '#2D2D2D',
+          borderRadius: '6px',
+        },
+        '.input-container.is-focus': {
+          borderColor: '#006AFF',
+        },
+        '.input-container.is-error': {
+          borderColor: '#ff1600',
+        },
+        '.message-text': {
+          color: '#999999',
+        },
+        '.message-icon': {
+          color: '#999999',
+        },
+        '.message-text.is-error': {
+          color: '#ff1600',
+        },
+        '.message-icon.is-error': {
+          color: '#ff1600',
+        },
+        input: {
+          backgroundColor: '#2D2D2D',
+          color: '#FFFFFF',
+          fontFamily: 'helvetica neue, sans-serif',
+        },
+        'input::placeholder': {
+          color: '#999999',
+        },
+        'input.is-error': {
+          color: '#ff1600',
+        },
+      };
+
       async function initializeCard(payments) {
-        const card = await payments.card();
+        const card = await payments.card({
+          style: darkModeCardStyle,
+        });
         await card.attach('#card-container');
 
         return card;
-      }
-
-      function buildPaymentRequest(payments) {
-        return payments.paymentRequest({
-          countryCode: 'US',
-          currencyCode: 'USD',
-          total: {
-            amount: '1.00',
-            label: 'Total',
-          },
-        });
-      }
-
-      async function initializeApplePay(payments) {
-        const paymentRequest = buildPaymentRequest(payments);
-        const applePay = await payments.applePay(paymentRequest);
-        // Note: You do not need to `attach` applePay.
-        return applePay;
       }
 
       async function createPayment(token) {
@@ -67,7 +78,6 @@
         throw new Error(errorBody);
       }
 
-      // Change the parameter to 'paymentMethod'
       async function tokenize(paymentMethod) {
         const tokenResult = await paymentMethod.tokenize();
         if (tokenResult.status === 'OK') {
@@ -114,16 +124,6 @@
           return;
         }
 
-        let applePay;
-        try {
-          applePay = await initializeApplePay(payments);
-        } catch (e) {
-          console.error('Initializing Apple Pay failed', e);
-          // There are a number of reason why Apple Pay may not be supported
-          // (e.g. Browser Support, Device Support, Account). Therefore you should handle
-          // initialization failures, while still loading other applicable payment methods.
-        }
-
         async function handlePaymentMethodSubmission(event, paymentMethod) {
           event.preventDefault();
 
@@ -146,22 +146,14 @@
         cardButton.addEventListener('click', async function (event) {
           await handlePaymentMethodSubmission(event, card);
         });
-
-        // Checkpoint 2.
-        if (applePay) {
-          const applePayButton = document.getElementById('apple-pay-button');
-          applePayButton.addEventListener('click', async function (event) {
-            await handlePaymentMethodSubmission(event, applePay);
-          });
-        }
       });
     </script>
   </head>
-  <body>
+  <body class="dark-mode">
     <form id="payment-form">
-      <div id="apple-pay-button"></div>
       <div id="card-container"></div>
       <button id="card-button" type="button">Pay $1.00</button>
     </form>
+    <div id="payment-status-container"></div>
   </body>
 </html>

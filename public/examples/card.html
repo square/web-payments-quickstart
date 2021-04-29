@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link href="app.css" rel="stylesheet" />
+    <link href="/app.css" rel="stylesheet" />
     <script
       type="text/javascript"
       src="https://sandbox.web.squarecdn.com/v1/square.js"
@@ -15,13 +15,6 @@
         await card.attach('#card-container');
 
         return card;
-      }
-
-      async function initializeGiftCard(payments) {
-        const giftCard = await payments.giftCard();
-        await giftCard.attach('#gift-card-container');
-
-        return giftCard;
       }
 
       async function createPayment(token) {
@@ -84,19 +77,12 @@
         }
 
         const payments = window.Square.payments(appId, locationId);
-
         let card;
         try {
           card = await initializeCard(payments);
         } catch (e) {
-          console.error('Initializing Gift Card failed', e);
-        }
-
-        let giftCard;
-        try {
-          giftCard = await initializeGiftCard(payments);
-        } catch (e) {
-          console.error('Initializing Gift Card failed', e);
+          console.error('Initializing Card failed', e);
+          return;
         }
 
         // Checkpoint 2.
@@ -106,7 +92,6 @@
           try {
             // disable the submit button as we await tokenization and make a payment request.
             cardButton.disabled = true;
-            giftCardButton.disabled = true;
             const token = await tokenize(paymentMethod);
             const paymentResults = await createPayment(token);
             displayPaymentResults('SUCCESS');
@@ -114,7 +99,6 @@
             console.debug('Payment Success', paymentResults);
           } catch (e) {
             cardButton.disabled = false;
-            giftCardButton.disabled = false;
             displayPaymentResults('FAILURE');
             console.error(e.message);
           }
@@ -124,19 +108,11 @@
         cardButton.addEventListener('click', async function (event) {
           await handlePaymentMethodSubmission(event, card);
         });
-
-        const giftCardButton = document.getElementById('gift-card-button');
-        giftCardButton.addEventListener('click', async function (event) {
-          await handlePaymentMethodSubmission(event, giftCard);
-        });
       });
     </script>
   </head>
   <body>
     <form id="payment-form">
-      <div id="gift-card-container"></div>
-      <button id="gift-card-button" type="button">Pay with Gift Card</button>
-
       <div id="card-container"></div>
       <button id="card-button" type="button">Pay $1.00</button>
     </form>
