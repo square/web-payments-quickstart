@@ -95,7 +95,18 @@
           throw new Error('Square.js failed to load properly');
         }
 
-        const payments = window.Square.payments(appId, locationId);
+        let payments;
+        try {
+          payments = window.Square.payments(appId, locationId);
+        } catch {
+          const statusContainer = document.getElementById(
+            'payment-status-container'
+          );
+          statusContainer.className = 'missing-credentials';
+          statusContainer.style.visibility = 'visible';
+          return;
+        }
+
         let card;
         try {
           card = await initializeCard(payments);

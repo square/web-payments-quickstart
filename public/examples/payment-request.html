@@ -53,7 +53,7 @@
         const req = payments.paymentRequest(paymentRequestDetails);
 
         // Checkpoint 2
-        req.addEventListener('shippingoptionchanged', (option, update) => {
+        req.addEventListener('shippingoptionchanged', (option) => {
           // Add your business logic here.
           // This tells you the shipping options selected by the buyer, and allows you to update
           // totals based on the pricing of each shipping option.
@@ -65,15 +65,14 @@
           // We want to update the line items it can be referenced later in other eventListener calls.
           lineItems = newLineItems;
 
-          // Calling update is required.
-          update({
+          return {
             lineItems,
             total,
-          });
+          };
         });
 
         // Checkpoint 3
-        req.addEventListener('shippingcontactchanged', (contact, update) => {
+        req.addEventListener('shippingcontactchanged', (contact) => {
           // Add your business logic here.
           // This tells you the address of the buyer, and allows you to update your shipping options
           // and pricing based on their location.
@@ -107,11 +106,11 @@
           total = calculateTotal(newLineItems);
           lineItems = newLineItems;
 
-          update({
+          return {
             lineItems: newLineItems,
             shippingOptions: newShippingOptions,
             total,
-          });
+          };
         });
 
         return req;
@@ -241,7 +240,18 @@
           throw new Error('Square.js failed to load properly');
         }
 
-        const payments = window.Square.payments(appId, locationId);
+        let payments;
+        try {
+          payments = window.Square.payments(appId, locationId);
+        } catch {
+          const statusContainer = document.getElementById(
+            'payment-status-container'
+          );
+          statusContainer.className = 'missing-credentials';
+          statusContainer.style.visibility = 'visible';
+          return;
+        }
+
         let card;
         try {
           card = await initializeCard(payments);
@@ -259,10 +269,6 @@
           // (e.g. Browser Support, Device Support, Account). Therefore you should handle
           // initialization failures, while still loading other applicable payment methods.
         }
-
-        const cardSubmissionButton = document.getElementById(
-          'card-submission-button'
-        );
 
         async function handlePaymentMethodSubmission(event, paymentMethod) {
           event.preventDefault();
