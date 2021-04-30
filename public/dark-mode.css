@@ -14,6 +14,10 @@
   color: #ffffff;
 }
 
+.dark-mode #payment-status-container.missing-credentials:after {
+  color: #ffffff;
+}
+
 .dark-mode #payment-status-container {
   background-color: #2d2d2d;
   border-color: #2d2d2d;

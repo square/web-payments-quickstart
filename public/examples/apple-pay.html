@@ -105,7 +105,18 @@
           throw new Error('Square.js failed to load properly');
         }
 
-        const payments = window.Square.payments(appId, locationId);
+        let payments;
+        try {
+          payments = window.Square.payments(appId, locationId);
+        } catch {
+          const statusContainer = document.getElementById(
+            'payment-status-container'
+          );
+          statusContainer.className = 'missing-credentials';
+          statusContainer.style.visibility = 'visible';
+          return;
+        }
+
         let card;
         try {
           card = await initializeCard(payments);
@@ -163,5 +174,6 @@
       <div id="card-container"></div>
       <button id="card-button" type="button">Pay $1.00</button>
     </form>
+    <div id="payment-status-container"></div>
   </body>
 </html>
