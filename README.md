@@ -5,6 +5,9 @@
 
 Quickstart for using Square's Web Payments SDK
 
+- [Web Payments SDK Overview](https://developer.squareup.com/docs/web-payments/overview).
+- [API Documentation](https://developer.squareup.com/reference/sdks/web/payments).
+
 ## Getting Started
 
 Start by [cloning](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository) this repository.
