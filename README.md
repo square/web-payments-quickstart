@@ -57,7 +57,7 @@ _Remember: Do not add your access tokens to git!_
 
 ### Setup
 
-When contributing to this project, you'll want to use Node v15 as defined by `.nvmrc` to take advantage of npm@7. You can use [nvm](https://github.com/nvm-sh/nvm) to install the correct version:
+When contributing to this project, you'll want to use Node v16 as defined by `.nvmrc` to take advantage of npm@7. You can use [nvm](https://github.com/nvm-sh/nvm) to install the correct version:
 
 ```sh
 nvm install $(cat .nvmrc)
