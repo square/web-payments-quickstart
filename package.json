@@ -38,7 +38,7 @@
     "microrouter": "^3.1.3",
     "nanoid": "^3.1.21",
     "serve-handler": "^6.1.3",
-    "square": "^9.0.0"
+    "square": "^14.1.0"
   },
   "devDependencies": {
     "@square/prettier-config": "^1.0.0",
