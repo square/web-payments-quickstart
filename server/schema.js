@@ -11,8 +11,24 @@ const paymentSchema = {
   optionalProperties: {
     amount: { type: 'uint32' },
     idempotencyKey: { type: 'string' },
+    customerId: { type: 'string' },
     verificationToken: { type: 'string' },
   },
 };
 
-module.exports = { validatePaymentPayload: ajv.compile(paymentSchema) };
+const cardSchema = {
+  properties: {
+    sourceId: { type: 'string' },
+    locationId: { type: 'string' },
+    customerId: { type: 'string' },
+  },
+  optionalProperties: {
+    idempotencyKey: { type: 'string' },
+    verificationToken: { type: 'string' },
+  },
+};
+
+module.exports = {
+  validatePaymentPayload: ajv.compile(paymentSchema),
+  validateCreateCardPayload: ajv.compile(cardSchema),
+};

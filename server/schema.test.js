@@ -33,3 +33,35 @@ test('validatePaymentPayload returns false if incomplete payload', (t) => {
 test('validatePaymentPayload returns false if empty payload', (t) => {
   t.false(schema.validatePaymentPayload({}));
 });
+
+test('validateCreateCardPayload returns true if valid payload', (t) => {
+  t.true(
+    schema.validateCreateCardPayload({
+      sourceId: 't0k3n',
+      locationId: 'LKYXSPGPXK05M',
+      customerId: 'customer123',
+    })
+  );
+});
+
+test('validateCreateCardPayload returns false if missing sourceId', (t) => {
+  t.false(
+    schema.validateCreateCardPayload({
+      locationId: 'LKYXSPGPXK05M',
+      customerId: 'customer123',
+    })
+  );
+});
+
+test('validateCreateCardPayload returns false if missing customerId', (t) => {
+  t.false(
+    schema.validateCreateCardPayload({
+      sourceId: 't0k3n',
+      locationId: 'LKYXSPGPXK05M',
+    })
+  );
+});
+
+test('validateCreateCardPayload returns false if empty payload', (t) => {
+  t.false(schema.validateCreateCardPayload({}));
+});

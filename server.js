@@ -10,7 +10,10 @@ const retry = require('async-retry');
 // logger gives us insight into what's happening
 const logger = require('./server/logger');
 // schema validates incoming requests
-const { validatePaymentPayload } = require('./server/schema');
+const {
+  validatePaymentPayload,
+  validateCreateCardPayload,
+} = require('./server/schema');
 // square provides the API client and error types
 const { ApiError, client: square } = require('./server/square');
 const { nanoid } = require('nanoid');
@@ -45,6 +48,10 @@ async function createPayment(req, res) {
           currency: 'USD',
         },
       };
+
+      if (payload.customerId) {
+        payment.customerId = payload.customerId;
+      }
 
       // VerificationDetails is part of Secure Card Authentication.
       // This part of the payload is highly recommended (and required for some countries)
@@ -82,6 +89,57 @@ async function createPayment(req, res) {
   });
 }
 
+async function storeCard(req, res) {
+  const payload = await json(req);
+
+  if (!validateCreateCardPayload(payload)) {
+    throw createError(400, 'Bad Request');
+  }
+  await retry(async (bail, attempt) => {
+    try {
+      logger.debug('Storing card', { attempt });
+
+      const idempotencyKey = payload.idempotencyKey || nanoid();
+      const cardReq = {
+        idempotencyKey,
+        sourceId: payload.sourceId,
+        card: {
+          customerId: payload.customerId,
+        },
+      };
+
+      if (payload.verificationToken) {
+        cardReq.verificationToken = payload.verificationToken;
+      }
+
+      const { result, statusCode } = await square.cardsApi.createCard(cardReq);
+
+      logger.info('Store Card succeeded!', { result, statusCode });
+
+      // remove 64-bit value from response
+      delete result.card.expMonth;
+      delete result.card.expYear;
+
+      send(res, statusCode, {
+        success: true,
+        card: result.card,
+      });
+    } catch (ex) {
+      if (ex instanceof ApiError) {
+        // likely an error in the request. don't retry
+        logger.error(ex.errors);
+        bail(ex);
+      } else {
+        // IDEA: send to error reporting service
+        logger.error(
+          `Error creating card-on-file on attempt ${attempt}: ${ex}`
+        );
+        throw ex; // to attempt retry
+      }
+    }
+  });
+}
+
 // serve static files like index.html and favicon.ico from public/ directory
 async function serveStatic(req, res) {
   logger.debug('Handling request', req.path);
@@ -93,5 +151,6 @@ async function serveStatic(req, res) {
 // export routes to be served by micro
 module.exports = router(
   post('/payment', createPayment),
+  post('/card', storeCard),
   get('/*', serveStatic)
 );
