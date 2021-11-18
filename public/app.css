@@ -68,6 +68,15 @@ body {
   gap: 15px;
 }
 
+#customer-input {
+  margin-bottom: 40px;
+}
+
+#card-input {
+  margin-top: 0;
+  margin-bottom: 40px;
+}
+
 h3 {
   margin: 0;
 }
@@ -183,4 +192,12 @@ button:disabled {
   content: 'applicationId and/or locationId is incorrect';
   font-size: 14px;
   line-height: 16px;
+}
+
+#payment-status-container.is-success.store-card-message:after {
+  content: 'Store card successful';
+}
+
+#payment-status-container.is-failure.store-card-message:after {
+  content: 'Store card failed';
 }

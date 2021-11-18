@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="/app.css" rel="stylesheet" />
+    <script
+      type="text/javascript"
+      src="https://sandbox.web.squarecdn.com/v1/square.js"
+    ></script>
+    <script>
+      const appId = '{APPLICATION_ID}';
+      const locationId = '{LOCATION_ID}';
+
+      async function initializeCard(payments) {
+        const card = await payments.card();
+        await card.attach('#card-container');
+
+        return card;
+      }
+
+      async function storeCard(token, customerId, verificationToken) {
+        const bodyParameters = {
+          locationId,
+          sourceId: token,
+          customerId,
+          verificationToken,
+        };
+
+        const body = JSON.stringify(bodyParameters);
+
+        const paymentResponse = await fetch('/card', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body,
+        });
+
+        if (paymentResponse.ok) {
+          return paymentResponse.json();
+        }
+
+        const errorBody = await paymentResponse.text();
+        throw new Error(errorBody);
+      }
+
+      async function tokenize(paymentMethod) {
+        const tokenResult = await paymentMethod.tokenize();
+        if (tokenResult.status === 'OK') {
+          return tokenResult.token;
+        } else {
+          throw new Error(
+            `Tokenization errors: ${JSON.stringify(tokenResult.errors)}`
+          );
+        }
+      }
+
+      // status is either SUCCESS or FAILURE;
+      function displayResults(status) {
+        const statusContainer = document.getElementById(
+          'payment-status-container'
+        );
+        if (status === 'SUCCESS') {
+          statusContainer.classList.remove('is-failure');
+          statusContainer.classList.add('is-success');
+        } else {
+          statusContainer.classList.remove('is-success');
+          statusContainer.classList.add('is-failure');
+        }
+
+        statusContainer.style.visibility = 'visible';
+      }
+
+      async function verifyBuyer(payments, token) {
+        const verificationDetails = {
+          billingContact: {
+            addressLines: ['123 Main Street', 'Apartment 1'],
+            familyName: 'Doe',
+            givenName: 'John',
+            email: 'jondoe@gmail.com',
+            country: 'GB',
+            phone: '3214563987',
+            region: 'LND',
+            city: 'London',
+          },
+          intent: 'STORE',
+        };
+
+        const verificationResults = await payments.verifyBuyer(
+          token,
+          verificationDetails
+        );
+        return verificationResults.token;
+      }
+
+      document.addEventListener('DOMContentLoaded', async function () {
+        if (!window.Square) {
+          throw new Error('Square.js failed to load properly');
+        }
+
+        let payments;
+        try {
+          payments = window.Square.payments(appId, locationId);
+        } catch {
+          const statusContainer = document.getElementById(
+            'payment-status-container'
+          );
+          statusContainer.className = 'missing-credentials';
+          statusContainer.style.visibility = 'visible';
+          return;
+        }
+
+        let card;
+        try {
+          card = await initializeCard(payments);
+        } catch (e) {
+          console.error('Initializing Card failed', e);
+          return;
+        }
+
+        async function handleStoreCardMethodSubmission(
+          event,
+          paymentMethod,
+          customerId
+        ) {
+          event.preventDefault();
+
+          try {
+            // disable the submit button as we await tokenization and make a payment request.
+            cardButton.disabled = true;
+            const token = await tokenize(paymentMethod);
+
+            let verificationToken = await verifyBuyer(payments, token);
+            const storeCardResults = await storeCard(
+              token,
+              customerId,
+              verificationToken
+            );
+
+            displayResults('SUCCESS');
+            console.debug('Store Card Success', storeCardResults);
+          } catch (e) {
+            cardButton.disabled = false;
+            displayResults('FAILURE');
+            console.error('Store Card Failure', e);
+          }
+        }
+
+        const cardButton = document.getElementById('card-button');
+        cardButton.addEventListener('click', async function (event) {
+          const textInput = document.getElementById('customer-input');
+          if (!textInput.reportValidity()) {
+            return;
+          }
+
+          const customerId = textInput.value;
+          handleStoreCardMethodSubmission(event, card, customerId);
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <form id="payment-form">
+      <input
+        id="customer-input"
+        type="text"
+        aria-required="true"
+        aria-label="Customer ID"
+        required="required"
+        placeholder="Customer ID"
+        name="customerId"
+      />
+      <div id="card-container" style="margin-top: 0"></div>
+      <button id="card-button" type="button">Store Card</button>
+    </form>
+    <div id="payment-status-container" class="store-card-message"></div>
+  </body>
+</html>
