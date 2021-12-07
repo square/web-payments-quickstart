@@ -201,3 +201,7 @@ button:disabled {
 #payment-status-container.is-failure.store-card-message:after {
   content: 'Store card failed';
 }
+
+#afterpay-button {
+  height: 40px;
+}
