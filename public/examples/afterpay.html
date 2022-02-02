@@ -37,33 +37,26 @@
                 label: 'Free',
                 taxLineItems: [
                   {
-                    amount: '0.10',
+                    amount: '0.00',
                     label: 'Tax',
                   },
                 ],
                 total: {
-                  amount: '1.10',
-                  label: 'total',
-                },
-              },
-              {
-                amount: '10.00',
-                id: 'shipping-option-2',
-                label: 'Expedited',
-                taxLineItems: [
-                  {
-                    amount: '1.10',
-                    label: 'Tax',
-                  },
-                ],
-                total: {
-                  amount: '11.10',
+                  amount: '1.00',
                   label: 'total',
                 },
               },
             ],
           };
         });
+
+        req.addEventListener(
+          'afterpay_shippingoptionchanged',
+          function (_option) {
+            // This event listener is for information purposes only.
+            // Changes here (or values returned) will not affect the Afterpay/Clearpay PaymentRequest.
+          }
+        );
 
         return req;
       }
