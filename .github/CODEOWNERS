@@ -4,4 +4,4 @@
 # Code owners are not automatically requested to review draft pull requests
 # When you mark a draft pull request as ready for review, code owners are automatically notified.
 
-* @maxbeatty
+* @square/websdk
