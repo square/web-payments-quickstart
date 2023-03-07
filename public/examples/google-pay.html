@@ -36,10 +36,11 @@
         return googlePay;
       }
 
-      async function createPayment(token) {
+      async function createPayment(token, verificationToken) {
         const body = JSON.stringify({
           locationId,
           sourceId: token,
+          verificationToken,
         });
 
         const paymentResponse = await fetch('/payment', {
@@ -72,6 +73,30 @@
 
           throw new Error(errorMessage);
         }
+      }
+
+      async function verifyBuyer(payments, token) {
+        const verificationDetails = {
+          amount: '1.00',
+          billingContact: {
+            addressLines: ['123 Main Street', 'Apartment 1'],
+            familyName: 'Doe',
+            givenName: 'John',
+            email: 'jondoe@gmail.com',
+            country: 'GB',
+            phone: '3214563987',
+            region: 'LND',
+            city: 'London',
+          },
+          currencyCode: 'USD',
+          intent: 'CHARGE',
+        };
+
+        const verificationResults = await payments.verifyBuyer(
+          token,
+          verificationDetails
+        );
+        return verificationResults.token;
       }
 
       // status is either SUCCESS or FAILURE;
@@ -132,7 +157,11 @@
             // disable the submit button as we await tokenization and make a payment request.
             cardButton.disabled = true;
             const token = await tokenize(paymentMethod);
-            const paymentResults = await createPayment(token);
+            let verificationToken = await verifyBuyer(payments, token);
+            const paymentResults = await createPayment(
+              token,
+              verificationToken
+            );
             displayPaymentResults('SUCCESS');
 
             console.debug('Payment Success', paymentResults);
