@@ -70,6 +70,7 @@
         statusContainer.style.visibility = 'visible';
       }
 
+      // Required in SCA Mandated Regions: Learn more at https://developer.squareup.com/docs/sca-overview
       async function verifyBuyer(payments, token) {
         const verificationDetails = {
           billingContact: {
@@ -117,17 +118,13 @@
           return;
         }
 
-        async function handleStoreCardMethodSubmission(
-          event,
-          paymentMethod,
-          customerId
-        ) {
+        async function handleStoreCardSubmission(event, card, customerId) {
           event.preventDefault();
 
           try {
             // disable the submit button as we await tokenization and make a payment request.
             cardButton.disabled = true;
-            const token = await tokenize(paymentMethod);
+            const token = await tokenize(card);
 
             let verificationToken = await verifyBuyer(payments, token);
             const storeCardResults = await storeCard(
@@ -153,7 +150,7 @@
           }
 
           const customerId = textInput.value;
-          handleStoreCardMethodSubmission(event, card, customerId);
+          handleStoreCardSubmission(event, card, customerId);
         });
       });
     </script>
