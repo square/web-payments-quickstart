@@ -11,6 +11,11 @@ updates:
       interval: 'weekly'
     commit-message:
       prefix: 'chore: '
+    ignore:
+      # remain on node-fetch 2.x as this repository is CJS, and 3.x is ESM-only
+      # https://github.com/node-fetch/node-fetch/blob/HEAD/docs/v3-UPGRADE-GUIDE.md#converted-to-es-module
+      - dependency-name: 'node-fetch'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: 'github-actions'
     directory: '/'
