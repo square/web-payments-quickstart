@@ -45,7 +45,7 @@
     "ava": "^5.2.0",
     "eslint": "^7.22.0",
     "eslint-plugin-ava": "^13.2.0",
-    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-square": "^20.0.3",
     "husky": "^4.3.8",
     "lint-staged": "^11.0.1",
