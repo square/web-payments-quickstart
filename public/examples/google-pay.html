@@ -10,36 +10,11 @@
       const appId = '{APPLICATION_ID}';
       const locationId = '{LOCATION_ID}';
 
-      async function initializeCard(payments) {
-        const card = await payments.card();
-        await card.attach('#card-container');
-
-        return card;
-      }
-
-      function buildPaymentRequest(payments) {
-        return payments.paymentRequest({
-          countryCode: 'US',
-          currencyCode: 'USD',
-          total: {
-            amount: '1.00',
-            label: 'Total',
-          },
-        });
-      }
-
-      async function initializeGooglePay(payments) {
-        const paymentRequest = buildPaymentRequest(payments);
-        const googlePay = await payments.googlePay(paymentRequest);
-        await googlePay.attach('#google-pay-button');
-
-        return googlePay;
-      }
-
-      async function createPayment(token) {
+      async function createPayment(token, verificationToken) {
         const body = JSON.stringify({
           locationId,
           sourceId: token,
+          verificationToken,
         });
 
         const paymentResponse = await fetch('/payment', {
@@ -74,6 +49,31 @@
         }
       }
 
+      // Required in SCA Mandated Regions: Learn more at https://developer.squareup.com/docs/sca-overview
+      async function verifyBuyer(payments, token) {
+        const verificationDetails = {
+          amount: '1.00',
+          billingContact: {
+            addressLines: ['123 Main Street', 'Apartment 1'],
+            familyName: 'Doe',
+            givenName: 'John',
+            email: 'jondoe@gmail.com',
+            country: 'GB',
+            phone: '3214563987',
+            region: 'LND',
+            city: 'London',
+          },
+          currencyCode: 'USD',
+          intent: 'CHARGE',
+        };
+
+        const verificationResults = await payments.verifyBuyer(
+          token,
+          verificationDetails
+        );
+        return verificationResults.token;
+      }
+
       // status is either SUCCESS or FAILURE;
       function displayPaymentResults(status) {
         const statusContainer = document.getElementById(
@@ -88,6 +88,26 @@
         }
 
         statusContainer.style.visibility = 'visible';
+      }
+
+      async function handlePaymentMethodSubmission(
+        payments,
+        event,
+        paymentMethod
+      ) {
+        event.preventDefault();
+
+        try {
+          const token = await tokenize(paymentMethod);
+          let verificationToken = await verifyBuyer(payments, token);
+          const paymentResults = await createPayment(token, verificationToken);
+          displayPaymentResults('SUCCESS');
+
+          console.debug('Payment Success', paymentResults);
+        } catch (e) {
+          displayPaymentResults('FAILURE');
+          console.error(e.message);
+        }
       }
 
       document.addEventListener('DOMContentLoaded', async function () {
@@ -107,53 +127,28 @@
           return;
         }
 
-        let card;
         try {
-          card = await initializeCard(payments);
-        } catch (e) {
-          console.error('Initializing Card failed', e);
-          return;
-        }
+          const paymentRequest = payments.paymentRequest({
+            countryCode: 'US',
+            currencyCode: 'USD',
+            total: {
+              amount: '1.00',
+              label: 'Total',
+            },
+          });
+          const googlePay = await payments.googlePay(paymentRequest);
 
-        let googlePay;
-        try {
-          googlePay = await initializeGooglePay(payments);
+          await googlePay.attach('#google-pay-button');
+          document
+            .getElementById('google-pay-button')
+            .addEventListener('click', async function (event) {
+              await handlePaymentMethodSubmission(payments, event, googlePay);
+            });
         } catch (e) {
           console.error('Initializing Google Pay failed', e);
           // There are a number of reason why Google Pay may not be supported
           // (e.g. Browser Support, Device Support, Account). Therefore you should handle
           // initialization failures, while still loading other applicable payment methods.
-        }
-
-        async function handlePaymentMethodSubmission(event, paymentMethod) {
-          event.preventDefault();
-
-          try {
-            // disable the submit button as we await tokenization and make a payment request.
-            cardButton.disabled = true;
-            const token = await tokenize(paymentMethod);
-            const paymentResults = await createPayment(token);
-            displayPaymentResults('SUCCESS');
-
-            console.debug('Payment Success', paymentResults);
-          } catch (e) {
-            cardButton.disabled = false;
-            displayPaymentResults('FAILURE');
-            console.error(e.message);
-          }
-        }
-
-        const cardButton = document.getElementById('card-button');
-        cardButton.addEventListener('click', async function (event) {
-          await handlePaymentMethodSubmission(event, card);
-        });
-
-        // Checkpoint 2.
-        if (googlePay) {
-          const googlePayButton = document.getElementById('google-pay-button');
-          googlePayButton.addEventListener('click', async function (event) {
-            await handlePaymentMethodSubmission(event, googlePay);
-          });
         }
       });
     </script>
@@ -161,8 +156,6 @@
   <body>
     <form id="payment-form">
       <div id="google-pay-button"></div>
-      <div id="card-container"></div>
-      <button id="card-button" type="button">Pay $1.00</button>
     </form>
     <div id="payment-status-container"></div>
   </body>
