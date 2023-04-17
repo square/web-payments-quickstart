@@ -16,7 +16,8 @@ const {
 } = require('./server/schema');
 // square provides the API client and error types
 const { ApiError, client: square } = require('./server/square');
-const { nanoid } = require('nanoid');
+
+const crypto = require('crypto');
 
 async function createPayment(req, res) {
   const payload = await json(req);
@@ -26,11 +27,16 @@ async function createPayment(req, res) {
   if (!validatePaymentPayload(payload)) {
     throw createError(400, 'Bad Request');
   }
+
+  // An idempotencyKey prevents unintended results from accidental duplicate requests.
+  // For more information about Square's idempotency concept, please see
+  // https://developer.squareup.com/docs/build-basics/common-api-patterns/idempotency
+  const idempotencyKey = crypto.randomUUID();
+
   await retry(async (bail, attempt) => {
     try {
       logger.debug('Creating payment', { attempt });
 
-      const idempotencyKey = payload.idempotencyKey || nanoid();
       const payment = {
         idempotencyKey,
         locationId: payload.locationId,
@@ -95,11 +101,16 @@ async function storeCard(req, res) {
   if (!validateCreateCardPayload(payload)) {
     throw createError(400, 'Bad Request');
   }
+
+  // An idempotencyKey prevents unintended results from accidental duplicate requests.
+  // For more information about Square's idempotency concept, please see
+  // https://developer.squareup.com/docs/build-basics/common-api-patterns/idempotency
+  const idempotencyKey = crypto.randomUUID();
+
   await retry(async (bail, attempt) => {
     try {
       logger.debug('Storing card', { attempt });
 
-      const idempotencyKey = payload.idempotencyKey || nanoid();
       const cardReq = {
         idempotencyKey,
         sourceId: payload.sourceId,
