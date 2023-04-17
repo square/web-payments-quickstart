@@ -28,7 +28,10 @@ async function createPayment(req, res) {
     throw createError(400, 'Bad Request');
   }
 
-  const idempotencyKey = payload.idempotencyKey || crypto.randomUUID();
+  // An idempotencyKey prevents unintended results from accidental duplicate requests.
+  // For more information about Square's idempotency concept, please see
+  // https://developer.squareup.com/docs/build-basics/common-api-patterns/idempotency
+  const idempotencyKey = crypto.randomUUID();
 
   await retry(async (bail, attempt) => {
     try {
@@ -99,7 +102,10 @@ async function storeCard(req, res) {
     throw createError(400, 'Bad Request');
   }
 
-  const idempotencyKey = payload.idempotencyKey || crypto.randomUUID();
+  // An idempotencyKey prevents unintended results from accidental duplicate requests.
+  // For more information about Square's idempotency concept, please see
+  // https://developer.squareup.com/docs/build-basics/common-api-patterns/idempotency
+  const idempotencyKey = crypto.randomUUID();
 
   await retry(async (bail, attempt) => {
     try {
