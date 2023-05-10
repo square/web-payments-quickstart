@@ -24,10 +24,11 @@
         return giftCard;
       }
 
-      async function createPayment(token) {
+      async function createPayment(token, idempotencyKey) {
         const body = JSON.stringify({
           locationId,
           sourceId: token,
+          idempotencyKey,
         });
 
         const paymentResponse = await fetch('/payment', {
@@ -109,8 +110,17 @@
           console.error('Initializing Gift Card failed', e);
         }
 
+        // An idempotencyKey prevents unintended results from accidental duplicate requests.
+        // For more information about Square's idempotency concept, please see
+        // https://developer.squareup.com/docs/build-basics/common-api-patterns/idempotency
+        const idempotencyKey = crypto.randomUUID();
+
         // Checkpoint 2.
-        async function handlePaymentMethodSubmission(event, paymentMethod) {
+        async function handlePaymentMethodSubmission(
+          event,
+          paymentMethod,
+          idempotencyKey
+        ) {
           event.preventDefault();
 
           try {
@@ -118,7 +128,7 @@
             cardButton.disabled = true;
             giftCardButton.disabled = true;
             const token = await tokenize(paymentMethod);
-            const paymentResults = await createPayment(token);
+            const paymentResults = await createPayment(token, idempotencyKey);
             displayPaymentResults('SUCCESS');
 
             console.debug('Payment Success', paymentResults);
@@ -132,12 +142,12 @@
 
         const cardButton = document.getElementById('card-button');
         cardButton.addEventListener('click', async function (event) {
-          await handlePaymentMethodSubmission(event, card);
+          await handlePaymentMethodSubmission(event, card, idempotencyKey);
         });
 
         const giftCardButton = document.getElementById('gift-card-button');
         giftCardButton.addEventListener('click', async function (event) {
-          await handlePaymentMethodSubmission(event, giftCard);
+          await handlePaymentMethodSubmission(event, giftCard, idempotencyKey);
         });
       });
     </script>

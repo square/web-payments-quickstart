@@ -24,10 +24,11 @@
         return ach;
       }
 
-      async function createPayment(token) {
+      async function createPayment(token, idempotencyKey) {
         const body = JSON.stringify({
           locationId,
           sourceId: token,
+          idempotencyKey,
         });
 
         const paymentResponse = await fetch('/payment', {
@@ -128,9 +129,15 @@
           return;
         }
 
+        // An idempotencyKey prevents unintended results from accidental duplicate requests.
+        // For more information about Square's idempotency concept, please see
+        // https://developer.squareup.com/docs/build-basics/common-api-patterns/idempotency
+        const idempotencyKey = crypto.randomUUID();
+
         async function handlePaymentMethodSubmission(
           event,
           paymentMethod,
+          idempotencyKey,
           options
         ) {
           event.preventDefault();
@@ -140,7 +147,7 @@
             cardButton.disabled = true;
             achButton.disabled = true;
             const token = await tokenize(paymentMethod, options);
-            const paymentResults = await createPayment(token);
+            const paymentResults = await createPayment(token, idempotencyKey);
             displayPaymentResults('SUCCESS');
 
             console.debug('Payment Success', paymentResults);
@@ -154,14 +161,19 @@
 
         const cardButton = document.getElementById('card-button');
         cardButton.addEventListener('click', async function (event) {
-          await handlePaymentMethodSubmission(event, card);
+          await handlePaymentMethodSubmission(event, card, idempotencyKey);
         });
 
         const achButton = document.getElementById('ach-button');
         achButton.addEventListener('click', async function (event) {
           const paymentForm = document.getElementById('payment-form');
           const achOptions = getACHOptions(paymentForm);
-          await handlePaymentMethodSubmission(event, ach, achOptions);
+          await handlePaymentMethodSubmission(
+            event,
+            ach,
+            idempotencyKey,
+            achOptions
+          );
         });
       });
     </script>

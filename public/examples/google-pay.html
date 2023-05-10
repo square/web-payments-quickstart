@@ -10,11 +10,12 @@
       const appId = '{APPLICATION_ID}';
       const locationId = '{LOCATION_ID}';
 
-      async function createPayment(token, verificationToken) {
+      async function createPayment(token, verificationToken, idempotencyKey) {
         const body = JSON.stringify({
           locationId,
           sourceId: token,
           verificationToken,
+          idempotencyKey,
         });
 
         const paymentResponse = await fetch('/payment', {
@@ -93,14 +94,19 @@
       async function handlePaymentMethodSubmission(
         payments,
         event,
-        paymentMethod
+        paymentMethod,
+        idempotencyKey
       ) {
         event.preventDefault();
 
         try {
           const token = await tokenize(paymentMethod);
           let verificationToken = await verifyBuyer(payments, token);
-          const paymentResults = await createPayment(token, verificationToken);
+          const paymentResults = await createPayment(
+            token,
+            verificationToken,
+            idempotencyKey
+          );
           displayPaymentResults('SUCCESS');
 
           console.debug('Payment Success', paymentResults);
@@ -138,11 +144,21 @@
           });
           const googlePay = await payments.googlePay(paymentRequest);
 
+          // An idempotencyKey prevents unintended results from accidental duplicate requests.
+          // For more information about Square's idempotency concept, please see
+          // https://developer.squareup.com/docs/build-basics/common-api-patterns/idempotency
+          const idempotencyKey = crypto.randomUUID();
+
           await googlePay.attach('#google-pay-button');
           document
             .getElementById('google-pay-button')
             .addEventListener('click', async function (event) {
-              await handlePaymentMethodSubmission(payments, event, googlePay);
+              await handlePaymentMethodSubmission(
+                payments,
+                event,
+                googlePay,
+                idempotencyKey
+              );
             });
         } catch (e) {
           console.error('Initializing Google Pay failed', e);

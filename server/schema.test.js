@@ -8,6 +8,7 @@ test('validatePaymentPayload returns true if valid payload', (t) => {
       amount: 100,
       locationId: 'LKYXSPGPXK05M',
       sourceId: 't0k3n',
+      idempotencyKey: 'idempot5cyK3y',
     })
   );
 });
@@ -40,6 +41,7 @@ test('validateCreateCardPayload returns true if valid payload', (t) => {
       sourceId: 't0k3n',
       locationId: 'LKYXSPGPXK05M',
       customerId: 'customer123',
+      idempotencyKey: 'idempot5cyK3y',
     })
   );
 });

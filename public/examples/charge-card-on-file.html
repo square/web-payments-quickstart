@@ -13,13 +13,15 @@
       async function createPaymentWithCardOnFile(
         sourceId,
         customerId,
-        verificationToken
+        verificationToken,
+        idempotencyKey
       ) {
         const bodyParameters = {
           locationId,
           sourceId,
           customerId,
           verificationToken,
+          idempotencyKey,
         };
 
         const body = JSON.stringify(bodyParameters);
@@ -98,10 +100,16 @@
           return;
         }
 
+        // An idempotencyKey prevents unintended results from accidental duplicate requests.
+        // For more information about Square's idempotency concept, please see
+        // https://developer.squareup.com/docs/build-basics/common-api-patterns/idempotency
+        const idempotencyKey = crypto.randomUUID();
+
         async function handleChargeCardOnFileSubmission(
           event,
           cardId,
-          customerId
+          customerId,
+          idempotencyKey
         ) {
           event.preventDefault();
 
@@ -113,7 +121,8 @@
             const paymentResults = await createPaymentWithCardOnFile(
               cardId,
               customerId,
-              verificationToken
+              verificationToken,
+              idempotencyKey
             );
 
             displayPaymentResults('SUCCESS');
@@ -139,7 +148,12 @@
 
           const cardId = cardTextInput.value;
           const customerId = customerTextInput.value;
-          handleChargeCardOnFileSubmission(event, cardId, customerId);
+          handleChargeCardOnFileSubmission(
+            event,
+            cardId,
+            customerId,
+            idempotencyKey
+          );
         });
       });
     </script>

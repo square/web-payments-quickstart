@@ -17,12 +17,18 @@
         return card;
       }
 
-      async function storeCard(token, customerId, verificationToken) {
+      async function storeCard(
+        token,
+        customerId,
+        verificationToken,
+        idempotencyKey
+      ) {
         const bodyParameters = {
           locationId,
           sourceId: token,
           customerId,
           verificationToken,
+          idempotencyKey,
         };
 
         const body = JSON.stringify(bodyParameters);
@@ -118,7 +124,17 @@
           return;
         }
 
-        async function handleStoreCardSubmission(event, card, customerId) {
+        // An idempotencyKey prevents unintended results from accidental duplicate requests.
+        // For more information about Square's idempotency concept, please see
+        // https://developer.squareup.com/docs/build-basics/common-api-patterns/idempotency
+        const idempotencyKey = crypto.randomUUID();
+
+        async function handleStoreCardSubmission(
+          event,
+          card,
+          customerId,
+          idempotencyKey
+        ) {
           event.preventDefault();
 
           try {
@@ -130,7 +146,8 @@
             const storeCardResults = await storeCard(
               token,
               customerId,
-              verificationToken
+              verificationToken,
+              idempotencyKey
             );
 
             displayResults('SUCCESS');
@@ -150,7 +167,7 @@
           }
 
           const customerId = textInput.value;
-          handleStoreCardSubmission(event, card, customerId);
+          handleStoreCardSubmission(event, card, customerId, idempotencyKey);
         });
       });
     </script>

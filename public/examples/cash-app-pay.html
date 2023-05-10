@@ -37,10 +37,11 @@
         return cashAppPay;
       }
 
-      async function createPayment(token) {
+      async function createPayment(token, idempotencyKey) {
         const body = JSON.stringify({
           locationId,
           sourceId: token,
+          idempotencyKey,
         });
 
         const paymentResponse = await fetch('/payment', {
@@ -92,6 +93,11 @@
           return;
         }
 
+        // An idempotencyKey prevents unintended results from accidental duplicate requests.
+        // For more information about Square's idempotency concept, please see
+        // https://developer.squareup.com/docs/build-basics/common-api-patterns/idempotency
+        const idempotencyKey = crypto.randomUUID();
+
         let cashAppPay;
         try {
           cashAppPay = await initializeCashApp(payments);
@@ -104,7 +110,10 @@
             async function ({ detail }) {
               const tokenResult = detail.tokenResult;
               if (tokenResult.status === 'OK') {
-                const paymentResults = await createPayment(tokenResult.token);
+                const paymentResults = await createPayment(
+                  tokenResult.token,
+                  idempotencyKey
+                );
 
                 displayPaymentResults('SUCCESS');
                 console.debug('Payment Success', paymentResults);

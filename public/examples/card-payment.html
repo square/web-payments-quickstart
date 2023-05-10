@@ -17,11 +17,12 @@
         return card;
       }
 
-      async function createPayment(token, verificationToken) {
+      async function createPayment(token, verificationToken, idempotencyKey) {
         const body = JSON.stringify({
           locationId,
           sourceId: token,
           verificationToken,
+          idempotencyKey,
         });
 
         const paymentResponse = await fetch('/payment', {
@@ -122,7 +123,16 @@
           return;
         }
 
-        async function handlePaymentMethodSubmission(event, card) {
+        // An idempotencyKey prevents unintended results from accidental duplicate requests.
+        // For more information about Square's idempotency concept, please see
+        // https://developer.squareup.com/docs/build-basics/common-api-patterns/idempotency
+        const idempotencyKey = crypto.randomUUID();
+
+        async function handlePaymentMethodSubmission(
+          event,
+          card,
+          idempotencyKey
+        ) {
           event.preventDefault();
 
           try {
@@ -132,7 +142,8 @@
             const verificationToken = await verifyBuyer(payments, token);
             const paymentResults = await createPayment(
               token,
-              verificationToken
+              verificationToken,
+              idempotencyKey
             );
             displayPaymentResults('SUCCESS');
 
@@ -146,7 +157,7 @@
 
         const cardButton = document.getElementById('card-button');
         cardButton.addEventListener('click', async function (event) {
-          await handlePaymentMethodSubmission(event, card);
+          await handlePaymentMethodSubmission(event, card, idempotencyKey);
         });
       });
     </script>

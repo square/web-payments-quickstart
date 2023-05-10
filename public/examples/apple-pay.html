@@ -45,10 +45,11 @@
         return applePay;
       }
 
-      async function createPayment(token) {
+      async function createPayment(token, idempotencyKey) {
         const body = JSON.stringify({
           locationId,
           sourceId: token,
+          idempotencyKey,
         });
 
         const paymentResponse = await fetch('/payment', {
@@ -135,14 +136,18 @@
           // initialization failures, while still loading other applicable payment methods.
         }
 
-        async function handlePaymentMethodSubmission(event, paymentMethod) {
+        async function handlePaymentMethodSubmission(
+          event,
+          paymentMethod,
+          idempotencyKey
+        ) {
           event.preventDefault();
 
           try {
             // disable the submit button as we await tokenization and make a payment request.
             cardButton.disabled = true;
             const token = await tokenize(paymentMethod);
-            const paymentResults = await createPayment(token);
+            const paymentResults = await createPayment(token, idempotencyKey);
             displayPaymentResults('SUCCESS');
 
             console.debug('Payment Success', paymentResults);
@@ -155,14 +160,18 @@
 
         const cardButton = document.getElementById('card-button');
         cardButton.addEventListener('click', async function (event) {
-          await handlePaymentMethodSubmission(event, card);
+          await handlePaymentMethodSubmission(event, card, idempotencyKey);
         });
 
         // Checkpoint 2.
         if (applePay) {
           const applePayButton = document.getElementById('apple-pay-button');
           applePayButton.addEventListener('click', async function (event) {
-            await handlePaymentMethodSubmission(event, applePay);
+            await handlePaymentMethodSubmission(
+              event,
+              applePay,
+              idempotencyKey
+            );
           });
         }
       });
