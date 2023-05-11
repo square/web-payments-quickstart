@@ -136,10 +136,7 @@
           // initialization failures, while still loading other applicable payment methods.
         }
 
-        async function handlePaymentMethodSubmission(
-          event,
-          paymentMethod
-        ) {
+        async function handlePaymentMethodSubmission(event, paymentMethod) {
           event.preventDefault();
 
           try {
@@ -166,10 +163,7 @@
         if (applePay) {
           const applePayButton = document.getElementById('apple-pay-button');
           applePayButton.addEventListener('click', async function (event) {
-            await handlePaymentMethodSubmission(
-              event,
-              applePay
-            );
+            await handlePaymentMethodSubmission(event, applePay);
           });
         }
       });

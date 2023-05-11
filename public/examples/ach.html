@@ -162,11 +162,7 @@
         achButton.addEventListener('click', async function (event) {
           const paymentForm = document.getElementById('payment-form');
           const achOptions = getACHOptions(paymentForm);
-          await handlePaymentMethodSubmission(
-            event,
-            ach,
-            achOptions
-          );
+          await handlePaymentMethodSubmission(event, ach, achOptions);
         });
       });
     </script>

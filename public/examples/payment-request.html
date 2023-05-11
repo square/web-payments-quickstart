@@ -271,10 +271,7 @@
           // initialization failures, while still loading other applicable payment methods.
         }
 
-        async function handlePaymentMethodSubmission(
-          event,
-          paymentMethod
-        ) {
+        async function handlePaymentMethodSubmission(event, paymentMethod) {
           event.preventDefault();
 
           try {
@@ -301,10 +298,7 @@
         if (googlePay !== undefined) {
           const googlePayButton = document.getElementById('google-pay-button');
           googlePayButton.addEventListener('click', async function (event) {
-            await handlePaymentMethodSubmission(
-              event,
-              googlePay
-            );
+            await handlePaymentMethodSubmission(event, googlePay);
           });
         }
       });

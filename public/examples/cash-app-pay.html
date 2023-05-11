@@ -105,9 +105,7 @@
             async function ({ detail }) {
               const tokenResult = detail.tokenResult;
               if (tokenResult.status === 'OK') {
-                const paymentResults = await createPayment(
-                  tokenResult.token
-                );
+                const paymentResults = await createPayment(tokenResult.token);
 
                 displayPaymentResults('SUCCESS');
                 console.debug('Payment Success', paymentResults);

@@ -17,11 +17,7 @@
         return card;
       }
 
-      async function storeCard(
-        token,
-        customerId,
-        verificationToken
-      ) {
+      async function storeCard(token, customerId, verificationToken) {
         const bodyParameters = {
           locationId,
           sourceId: token,
@@ -123,11 +119,7 @@
           return;
         }
 
-        async function handleStoreCardSubmission(
-          event,
-          card,
-          customerId
-        ) {
+        async function handleStoreCardSubmission(event, card, customerId) {
           event.preventDefault();
 
           try {

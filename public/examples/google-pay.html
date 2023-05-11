@@ -101,10 +101,7 @@
         try {
           const token = await tokenize(paymentMethod);
           let verificationToken = await verifyBuyer(payments, token);
-          const paymentResults = await createPayment(
-            token,
-            verificationToken
-          );
+          const paymentResults = await createPayment(token, verificationToken);
           displayPaymentResults('SUCCESS');
 
           console.debug('Payment Success', paymentResults);
@@ -146,11 +143,7 @@
           document
             .getElementById('google-pay-button')
             .addEventListener('click', async function (event) {
-              await handlePaymentMethodSubmission(
-                payments,
-                event,
-                googlePay
-              );
+              await handlePaymentMethodSubmission(payments, event, googlePay);
             });
         } catch (e) {
           console.error('Initializing Google Pay failed', e);

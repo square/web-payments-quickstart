@@ -159,10 +159,7 @@
           // initialization failures, while still loading other applicable payment methods.
         }
 
-        async function handlePaymentMethodSubmission(
-          event,
-          paymentMethod
-        ) {
+        async function handlePaymentMethodSubmission(event, paymentMethod) {
           event.preventDefault();
 
           try {
@@ -189,10 +186,7 @@
         if (afterpay) {
           const afterpayButton = document.getElementById('afterpay-button');
           afterpayButton.addEventListener('click', async function (event) {
-            await handlePaymentMethodSubmission(
-              event,
-              afterpay
-            );
+            await handlePaymentMethodSubmission(event, afterpay);
           });
         }
       });
