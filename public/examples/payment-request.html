@@ -181,11 +181,11 @@
         return googlePay;
       }
 
-      async function createPayment(token, idempotencyKey) {
+      async function createPayment(token) {
         const body = JSON.stringify({
           locationId,
           sourceId: token,
-          idempotencyKey,
+          idempotencyKey: window.crypto.randomUUID(),
         });
 
         const paymentResponse = await fetch('/payment', {
@@ -271,15 +271,9 @@
           // initialization failures, while still loading other applicable payment methods.
         }
 
-        // An idempotencyKey prevents unintended results from accidental duplicate requests.
-        // For more information about Square's idempotency concept, please see
-        // https://developer.squareup.com/docs/build-basics/common-api-patterns/idempotency
-        const idempotencyKey = crypto.randomUUID();
-
         async function handlePaymentMethodSubmission(
           event,
-          paymentMethod,
-          idempotencyKey
+          paymentMethod
         ) {
           event.preventDefault();
 
@@ -287,7 +281,7 @@
             // disable the submit button as we await tokenization and make a payment request.
             cardButton.disabled = true;
             const token = await tokenize(paymentMethod);
-            const paymentResults = await createPayment(token, idempotencyKey);
+            const paymentResults = await createPayment(token);
             displayPaymentResults('SUCCESS');
 
             console.debug('Payment Success', paymentResults);
@@ -300,7 +294,7 @@
 
         const cardButton = document.getElementById('card-button');
         cardButton.addEventListener('click', async function (event) {
-          await handlePaymentMethodSubmission(event, card, idempotencyKey);
+          await handlePaymentMethodSubmission(event, card);
         });
 
         // Checkpoint 2.
@@ -309,8 +303,7 @@
           googlePayButton.addEventListener('click', async function (event) {
             await handlePaymentMethodSubmission(
               event,
-              googlePay,
-              idempotencyKey
+              googlePay
             );
           });
         }
