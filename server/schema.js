@@ -7,6 +7,7 @@ const paymentSchema = {
   properties: {
     sourceId: { type: 'string' },
     locationId: { type: 'string' },
+    idempotencyKey: { type: 'string' },
   },
   optionalProperties: {
     amount: { type: 'uint32' },
@@ -20,6 +21,7 @@ const cardSchema = {
     sourceId: { type: 'string' },
     locationId: { type: 'string' },
     customerId: { type: 'string' },
+    idempotencyKey: { type: 'string' },
   },
   optionalProperties: {
     verificationToken: { type: 'string' },

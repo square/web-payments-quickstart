@@ -20,6 +20,7 @@
           sourceId,
           customerId,
           verificationToken,
+          idempotencyKey: window.crypto.randomUUID(),
         };
 
         const body = JSON.stringify(bodyParameters);

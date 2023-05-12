@@ -22,6 +22,7 @@
           locationId,
           sourceId: token,
           verificationToken,
+          idempotencyKey: window.crypto.randomUUID(),
         });
 
         const paymentResponse = await fetch('/payment', {

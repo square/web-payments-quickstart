@@ -28,6 +28,7 @@
         const body = JSON.stringify({
           locationId,
           sourceId: token,
+          idempotencyKey: window.crypto.randomUUID(),
         });
 
         const paymentResponse = await fetch('/payment', {
