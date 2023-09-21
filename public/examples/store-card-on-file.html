@@ -75,14 +75,14 @@
       async function verifyBuyer(payments, token) {
         const verificationDetails = {
           billingContact: {
-            addressLines: ['123 Main Street', 'Apartment 1'],
-            familyName: 'Doe',
             givenName: 'John',
-            email: 'jondoe@gmail.com',
-            country: 'GB',
+            familyName: 'Doe',
+            email: 'john.doe@square.example',
             phone: '3214563987',
-            region: 'LND',
+            addressLines: ['123 Main Street', 'Apartment 1'],
             city: 'London',
+            state: 'LND',
+            countryCode: 'GB',
           },
           intent: 'STORE',
         };
