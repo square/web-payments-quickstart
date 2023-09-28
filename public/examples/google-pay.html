@@ -55,14 +55,14 @@
         const verificationDetails = {
           amount: '1.00',
           billingContact: {
-            addressLines: ['123 Main Street', 'Apartment 1'],
-            familyName: 'Doe',
             givenName: 'John',
+            familyName: 'Doe',
             email: 'john.doe@square.example',
-            country: 'GB',
             phone: '3214563987',
-            region: 'LND',
+            addressLines: ['123 Main Street', 'Apartment 1'],
             city: 'London',
+            state: 'LND',
+            countryCode: 'GB',
           },
           currencyCode: 'GBP',
           intent: 'CHARGE',
@@ -130,8 +130,8 @@
 
         try {
           const paymentRequest = payments.paymentRequest({
-            countryCode: 'US',
-            currencyCode: 'USD',
+            countryCode: 'GB',
+            currencyCode: 'GBP',
             total: {
               amount: '1.00',
               label: 'Total',
