@@ -41,29 +41,32 @@
       }
 
       async function tokenize(paymentMethod, options = {}) {
-        paymentMethod.addEventListener('ontokenization', async function (event) {
-          const { tokenResult, error } = event.detail;
-          if (error !== undefined) {
-            let errorMessage = `Tokenization failed with error: ${error}`;
-            throw new Error(errorMessage);
-          }
-          if (tokenResult.status === 'OK') {
-            const paymentResults = await createPayment(tokenResult.token);
-            displayPaymentResults('SUCCESS');
+        paymentMethod.addEventListener(
+          'ontokenization',
+          async function (event) {
+            const { tokenResult, error } = event.detail;
+            if (error !== undefined) {
+              let errorMessage = `Tokenization failed with error: ${error}`;
+              throw new Error(errorMessage);
+            }
+            if (tokenResult.status === 'OK') {
+              const paymentResults = await createPayment(tokenResult.token);
+              displayPaymentResults('SUCCESS');
 
-            console.debug('Payment Success', paymentResults);
-          } else {
-            let errorMessage = `Tokenization failed with status: ${tokenResult.status}`;
-            if (tokenResult.errors) {
-              errorMessage += ` and errors: ${JSON.stringify(
-                tokenResult.errors
-              )}`;
+              console.debug('Payment Success', paymentResults);
+            } else {
+              let errorMessage = `Tokenization failed with status: ${tokenResult.status}`;
+              if (tokenResult.errors) {
+                errorMessage += ` and errors: ${JSON.stringify(
+                  tokenResult.errors
+                )}`;
+              }
+              throw new Error(errorMessage);
             }
-            throw new Error(errorMessage);
-            }
-          });
-          paymentMethod.tokenize(options);
-        }
+          }
+        );
+        paymentMethod.tokenize(options);
+      }
 
       // status is either SUCCESS or FAILURE;
       function displayPaymentResults(status) {
@@ -95,7 +98,11 @@
         const billingContact = getBillingContact(form);
         const accountHolderName = `${billingContact.givenName} ${billingContact.familyName}`;
 
-        return { accountHolderName, intent: 'CHARGE', total: { amount: 100, currencyCode: 'USD' } };
+        return {
+          accountHolderName,
+          intent: 'CHARGE',
+          total: { amount: 100, currencyCode: 'USD' },
+        };
       }
 
       document.addEventListener('DOMContentLoaded', async function () {
