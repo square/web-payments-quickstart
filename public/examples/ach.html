@@ -10,13 +10,6 @@
       const appId = '{APPLICATION_ID}';
       const locationId = '{LOCATION_ID}';
 
-      async function initializeCard(payments) {
-        const card = await payments.card();
-        await card.attach('#card-container');
-
-        return card;
-      }
-
       async function initializeACH(payments) {
         const ach = await payments.ach();
         // Note: ACH does not have an .attach(...) method
@@ -47,20 +40,32 @@
         throw new Error(errorBody);
       }
 
-      async function tokenize(paymentMethod, options = {}) {
-        const tokenResult = await paymentMethod.tokenize(options);
-        if (tokenResult.status === 'OK') {
-          return tokenResult.token;
-        } else {
-          let errorMessage = `Tokenization failed with status: ${tokenResult.status}`;
-          if (tokenResult.errors) {
-            errorMessage += ` and errors: ${JSON.stringify(
-              tokenResult.errors
-            )}`;
-          }
+      function tokenize(paymentMethod, options = {}) {
+        paymentMethod.addEventListener(
+          'ontokenization',
+          async function (event) {
+            const { tokenResult, error } = event.detail;
+            if (error !== undefined) {
+              let errorMessage = `Tokenization failed with error: ${error}`;
+              throw new Error(errorMessage);
+            }
+            if (tokenResult.status === 'OK') {
+              const paymentResults = await createPayment(tokenResult.token);
+              displayPaymentResults('SUCCESS');
 
-          throw new Error(errorMessage);
-        }
+              console.debug('Payment Success', paymentResults);
+            } else {
+              let errorMessage = `Tokenization failed with status: ${tokenResult.status}`;
+              if (tokenResult.errors) {
+                errorMessage += ` and errors: ${JSON.stringify(
+                  tokenResult.errors
+                )}`;
+              }
+              throw new Error(errorMessage);
+            }
+          }
+        );
+        paymentMethod.tokenize(options);
       }
 
       // status is either SUCCESS or FAILURE;
@@ -93,7 +98,11 @@
         const billingContact = getBillingContact(form);
         const accountHolderName = `${billingContact.givenName} ${billingContact.familyName}`;
 
-        return { accountHolderName };
+        return {
+          accountHolderName,
+          intent: 'CHARGE',
+          total: { amount: 100, currencyCode: 'USD' },
+        };
       }
 
       document.addEventListener('DOMContentLoaded', async function () {
@@ -113,14 +122,6 @@
           return;
         }
 
-        let card;
-        try {
-          card = await initializeCard(payments);
-        } catch (e) {
-          console.error('Initializing Card failed', e);
-          return;
-        }
-
         let ach;
         try {
           ach = await initializeACH(payments);
@@ -137,33 +138,23 @@
           event.preventDefault();
 
           try {
-            // disable the submit button as we await tokenization and make a payment request.
-            cardButton.disabled = true;
             achButton.disabled = true;
-            const token = await tokenize(paymentMethod, options);
-            const paymentResults = await createPayment(token);
-            displayPaymentResults('SUCCESS');
-
-            console.debug('Payment Success', paymentResults);
+            tokenize(paymentMethod, options);
           } catch (e) {
-            cardButton.disabled = false;
             achButton.disabled = false;
             displayPaymentResults('FAILURE');
             console.error(e.message);
           }
         }
 
-        const cardButton = document.getElementById('card-button');
-        cardButton.addEventListener('click', async function (event) {
-          await handlePaymentMethodSubmission(event, card);
-        });
-
-        const achButton = document.getElementById('ach-button');
-        achButton.addEventListener('click', async function (event) {
-          const paymentForm = document.getElementById('payment-form');
-          const achOptions = getACHOptions(paymentForm);
-          await handlePaymentMethodSubmission(event, ach, achOptions);
-        });
+        if (ach) {
+          const achButton = document.getElementById('ach-button');
+          achButton.addEventListener('click', async function (event) {
+            const paymentForm = document.getElementById('payment-form');
+            const achOptions = getACHOptions(paymentForm);
+            await handlePaymentMethodSubmission(event, ach, achOptions);
+          });
+        }
       });
     </script>
   </head>
@@ -193,9 +184,6 @@
         />
       </fieldset>
       <button id="ach-button" type="button">Pay with Bank Account</button>
-
-      <div id="card-container"></div>
-      <button id="card-button" type="button">Pay $1.00</button>
     </form>
     <div id="payment-status-container"></div>
   </body>
