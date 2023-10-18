@@ -140,12 +140,15 @@
           }
         }
 
-        const achButton = document.getElementById('ach-button');
-        achButton.addEventListener('click', async function (event) {
-          const paymentForm = document.getElementById('payment-form');
-          const achOptions = getACHOptions(paymentForm);
-          await handlePaymentMethodSubmission(event, ach, achOptions);
-        });
+        // Checkpoint 2.
+        if (ach) {
+          const achButton = document.getElementById('ach-button');
+          achButton.addEventListener('click', async function (event) {
+            const paymentForm = document.getElementById('payment-form');
+            const achOptions = getACHOptions(paymentForm);
+            await handlePaymentMethodSubmission(event, ach, achOptions);
+          });
+        }
       });
     </script>
   </head>
