@@ -40,7 +40,7 @@
         throw new Error(errorBody);
       }
 
-      async function tokenize(paymentMethod, options = {}) {
+      function tokenize(paymentMethod, options = {}) {
         paymentMethod.addEventListener(
           'ontokenization',
           async function (event) {
