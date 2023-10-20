@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <link href="/app.css" rel="stylesheet" />
@@ -50,7 +50,7 @@
           return tokenResult.token;
         } else {
           throw new Error(
-            `Tokenization errors: ${JSON.stringify(tokenResult.errors)}`
+            `Tokenization errors: ${JSON.stringify(tokenResult.errors)}`,
           );
         }
       }
@@ -58,7 +58,7 @@
       // status is either SUCCESS or FAILURE;
       function displayResults(status) {
         const statusContainer = document.getElementById(
-          'payment-status-container'
+          'payment-status-container',
         );
         if (status === 'SUCCESS') {
           statusContainer.classList.remove('is-failure');
@@ -89,7 +89,7 @@
 
         const verificationResults = await payments.verifyBuyer(
           token,
-          verificationDetails
+          verificationDetails,
         );
         return verificationResults.token;
       }
@@ -104,7 +104,7 @@
           payments = window.Square.payments(appId, locationId);
         } catch {
           const statusContainer = document.getElementById(
-            'payment-status-container'
+            'payment-status-container',
           );
           statusContainer.className = 'missing-credentials';
           statusContainer.style.visibility = 'visible';
@@ -131,7 +131,7 @@
             const storeCardResults = await storeCard(
               token,
               customerId,
-              verificationToken
+              verificationToken,
             );
 
             displayResults('SUCCESS');

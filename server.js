@@ -59,9 +59,8 @@ async function createPayment(req, res) {
         payment.verificationToken = payload.verificationToken;
       }
 
-      const { result, statusCode } = await square.paymentsApi.createPayment(
-        payment
-      );
+      const { result, statusCode } =
+        await square.paymentsApi.createPayment(payment);
 
       logger.info('Payment succeeded!', { result, statusCode });
 
@@ -131,7 +130,7 @@ async function storeCard(req, res) {
       } else {
         // IDEA: send to error reporting service
         logger.error(
-          `Error creating card-on-file on attempt ${attempt}: ${ex}`
+          `Error creating card-on-file on attempt ${attempt}: ${ex}`,
         );
         throw ex; // to attempt retry
       }
@@ -151,5 +150,5 @@ async function serveStatic(req, res) {
 module.exports = router(
   post('/payment', createPayment),
   post('/card', storeCard),
-  get('/*', serveStatic)
+  get('/*', serveStatic),
 );
