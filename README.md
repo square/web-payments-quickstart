@@ -17,7 +17,7 @@ git clone https://github.com/square/web-payments-quickstart
 cd web-payments-quickstart
 ```
 
-Install [Node.js (v16)](https://nodejs.org/en/about/releases/) which will include `npm`. This repository contains an `.nvmrc` file if you use [`nvm`](https://github.com/nvm-sh/nvm) to manage your node versions.
+Install [Node.js](https://nodejs.org/en/about/releases/) which will include `npm`. This repository contains an `.nvmrc` file if you use [`nvm`](https://github.com/nvm-sh/nvm) to manage your node versions.
 
 Then, to install dependencies run:
 
@@ -57,7 +57,7 @@ _Remember: Do not add your access tokens to git!_
 
 ### Setup
 
-When contributing to this project, you'll want to use Node v16 as defined by `.nvmrc` to take advantage of npm@7. You can use [nvm](https://github.com/nvm-sh/nvm) to install the correct version:
+When contributing to this project, you'll want to use the version of Node as defined by `.nvmrc`. You can use [nvm](https://github.com/nvm-sh/nvm) to install the correct version:
 
 ```sh
 nvm install $(cat .nvmrc)

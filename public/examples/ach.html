@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <link href="/app.css" rel="stylesheet" />
@@ -58,12 +58,12 @@
               let errorMessage = `Tokenization failed with status: ${tokenResult.status}`;
               if (tokenResult.errors) {
                 errorMessage += ` and errors: ${JSON.stringify(
-                  tokenResult.errors
+                  tokenResult.errors,
                 )}`;
               }
               throw new Error(errorMessage);
             }
-          }
+          },
         );
         await paymentMethod.tokenize(options);
       }
@@ -71,7 +71,7 @@
       // status is either SUCCESS or FAILURE;
       function displayPaymentResults(status) {
         const statusContainer = document.getElementById(
-          'payment-status-container'
+          'payment-status-container',
         );
         if (status === 'SUCCESS') {
           statusContainer.classList.remove('is-failure');
@@ -115,7 +115,7 @@
           payments = window.Square.payments(appId, locationId);
         } catch {
           const statusContainer = document.getElementById(
-            'payment-status-container'
+            'payment-status-container',
           );
           statusContainer.className = 'missing-credentials';
           statusContainer.style.visibility = 'visible';
@@ -133,7 +133,7 @@
         async function handlePaymentMethodSubmission(
           event,
           paymentMethod,
-          options
+          options,
         ) {
           event.preventDefault();
 

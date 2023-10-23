@@ -9,7 +9,7 @@ test('validatePaymentPayload returns true if valid payload', (t) => {
       locationId: 'LKYXSPGPXK05M',
       sourceId: 't0k3n',
       idempotencyKey: 'idempot5cyK3y',
-    })
+    }),
   );
 });
 
@@ -19,7 +19,7 @@ test('validatePaymentPayload returns false if invalid amount', (t) => {
       amount: '$2.34',
       locationId: 'LKYXSPGPXK05M',
       sourceId: 't0k3n',
-    })
+    }),
   );
 });
 
@@ -27,7 +27,7 @@ test('validatePaymentPayload returns false if incomplete payload', (t) => {
   t.false(
     schema.validatePaymentPayload({
       locationId: 'LKYXSPGPXK05M',
-    })
+    }),
   );
 });
 
@@ -42,7 +42,7 @@ test('validateCreateCardPayload returns true if valid payload', (t) => {
       locationId: 'LKYXSPGPXK05M',
       customerId: 'customer123',
       idempotencyKey: 'idempot5cyK3y',
-    })
+    }),
   );
 });
 
@@ -51,7 +51,7 @@ test('validateCreateCardPayload returns false if missing sourceId', (t) => {
     schema.validateCreateCardPayload({
       locationId: 'LKYXSPGPXK05M',
       customerId: 'customer123',
-    })
+    }),
   );
 });
 
@@ -60,7 +60,7 @@ test('validateCreateCardPayload returns false if missing customerId', (t) => {
     schema.validateCreateCardPayload({
       sourceId: 't0k3n',
       locationId: 'LKYXSPGPXK05M',
-    })
+    }),
   );
 });
 
