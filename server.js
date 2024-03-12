@@ -117,6 +117,7 @@ async function storeCard(req, res) {
       // remove 64-bit value from response
       delete result.card.expMonth;
       delete result.card.expYear;
+      delete result.card.version;
 
       send(res, statusCode, {
         success: true,
