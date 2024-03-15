@@ -114,9 +114,11 @@ async function storeCard(req, res) {
 
       logger.info('Store Card succeeded!', { result, statusCode });
 
-      // remove 64-bit value from response
-      delete result.card.expMonth;
-      delete result.card.expYear;
+      // cast 64-bit values to string
+      // to prevent JSON serialization error during send method
+      result.card.expMonth = result.card.expMonth.toString();
+      result.card.expYear = result.card.expYear.toString();
+      result.card.version = result.card.version.toString();
 
       send(res, statusCode, {
         success: true,
