@@ -130,24 +130,24 @@
           return;
         }
 
-        async function handlePaymentMethodSubmission(
-          event,
-          paymentMethod,
-          options,
-        ) {
-          event.preventDefault();
-
-          try {
-            achButton.disabled = true;
-            await tokenize(paymentMethod, options);
-          } catch (e) {
-            achButton.disabled = false;
-            displayPaymentResults('FAILURE');
-            console.error(e.message);
-          }
-        }
-
         if (ach) {
+          async function handlePaymentMethodSubmission(
+            event,
+            paymentMethod,
+            options,
+          ) {
+            event.preventDefault();
+
+            try {
+              achButton.disabled = true;
+              await tokenize(paymentMethod, options);
+            } catch (e) {
+              achButton.disabled = false;
+              displayPaymentResults('FAILURE');
+              console.error(e.message);
+            }
+          }
+
           const achButton = document.getElementById('ach-button');
           achButton.addEventListener('click', async function (event) {
             const paymentForm = document.getElementById('payment-form');
