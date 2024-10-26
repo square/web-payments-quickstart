@@ -4,6 +4,7 @@
   "description": "Quickstart for using Square's Web Payments SDK",
   "main": "server.js",
   "private": true,
+  "type": "commonjs",
   "scripts": {
     "start": "NODE_ENV=production micro --listen tcp://0.0.0.0:${PORT-3000}",
     "start:sandbox": "NODE_ENV=sandbox micro --listen tcp://0.0.0.0:${PORT-3000}",

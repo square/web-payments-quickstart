@@ -13,7 +13,7 @@ export default [
     },
   },
   {
-    files: ['eslint.config.js'],
+    files: ['eslint.config.mjs'],
     languageOptions: {
       sourceType: 'module',
     },
