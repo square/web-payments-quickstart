@@ -4,15 +4,16 @@
   "description": "Quickstart for using Square's Web Payments SDK",
   "main": "server.js",
   "private": true,
+  "type": "commonjs",
   "scripts": {
     "start": "NODE_ENV=production micro --listen tcp://0.0.0.0:${PORT-3000}",
     "start:sandbox": "NODE_ENV=sandbox micro --listen tcp://0.0.0.0:${PORT-3000}",
     "inspect": "node --inspect node_modules/.bin/micro-dev",
     "dev": "micro-dev",
     "lint": "npm-run-all --serial lint:*",
-    "lint:eslint": "eslint --ignore-path .gitignore --cache .",
-    "lint:prettier": "prettier --ignore-path .gitignore --check .",
-    "lint:prettier:fix": "prettier --ignore-path .gitignore --write .",
+    "lint:eslint": "eslint --ignore-pattern .gitignore --cache .",
+    "lint:prettier": "prettier --ignore-pattern .gitignore --check .",
+    "lint:prettier:fix": "prettier --ignore-pattern .gitignore --write .",
     "test": "npm-run-all --serial lint test:*",
     "test:unit": "nyc ava"
   },
@@ -42,7 +43,7 @@
   "devDependencies": {
     "@square/prettier-config": "^1.0.0",
     "ava": "^5.3.1",
-    "eslint": "^8.52.0",
+    "eslint": "^9.13.0",
     "eslint-plugin-ava": "^14.0.0",
     "eslint-plugin-prettier": "^5.0.1",
     "eslint-plugin-square": "^26.0.0",
