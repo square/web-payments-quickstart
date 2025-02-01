@@ -34,11 +34,6 @@ async function createPayment(req, res) {
         idempotencyKey: payload.idempotencyKey,
         locationId: payload.locationId,
         sourceId: payload.sourceId,
-        // While it's tempting to pass this data from the client
-        // Doing so allows bad actor to modify these values
-        // Instead, leverage Orders to create an order on the server
-        // and pass the Order ID to createPayment rather than raw amounts
-        // See Orders documentation: https://developer.squareup.com/docs/orders-api/what-it-does
         amountMoney: {
           // the expected amount is in cents, meaning this is $1.00.
           amount: '100',
