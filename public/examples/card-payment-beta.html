@@ -17,11 +17,10 @@
         return card;
       }
 
-      async function createPayment(token, verificationToken) {
+      async function createPayment(token) {
         const body = JSON.stringify({
           locationId,
           sourceId: token,
-          verificationToken,
           idempotencyKey: window.crypto.randomUUID(),
         });
 
