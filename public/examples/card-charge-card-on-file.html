@@ -152,7 +152,12 @@
 
           const cardId = cardTextInput.value;
           const customerId = customerTextInput.value;
-          await handleChargeCardOnFileSubmission(event, card, cardId, customerId);
+          await handleChargeCardOnFileSubmission(
+            event,
+            card,
+            cardId,
+            customerId,
+          );
         });
       });
     </script>
