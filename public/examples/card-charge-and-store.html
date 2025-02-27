@@ -40,8 +40,32 @@
         throw new Error(errorBody);
       }
 
+      async function storeCard(paymentId, customerId) {
+        const body = JSON.stringify({
+          locationId,
+          sourceId: paymentId,
+          customerId,
+          idempotencyKey: window.crypto.randomUUID(),
+        });
+
+        const storeCardResponse = await fetch('/card', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body,
+        });
+
+        if (storeCardResponse.ok) {
+          return storeCardResponse.json();
+        }
+
+        const errorBody = await storeCardResponse.text();
+        throw new Error(errorBody);
+      }
+
+      // New payment flow
       async function tokenize(paymentMethod) {
-        // Required in SCA Mandated Regions: Learn more at https://developer.squareup.com/docs/sca-overview
         const verificationDetails = {
           amount: '1.00',
           billingContact: {
@@ -55,7 +79,7 @@
             countryCode: 'GB',
           },
           currencyCode: 'GBP',
-          intent: 'CHARGE',
+          intent: 'CHARGE_AND_STORE',
           customerInitiated: true,
           sellerKeyedIn: false,
         };
@@ -75,7 +99,7 @@
       }
 
       // status is either SUCCESS or FAILURE;
-      function displayPaymentResults(status) {
+      function displayResults(status) {
         const statusContainer = document.getElementById(
           'payment-status-container',
         );
@@ -115,7 +139,11 @@
           return;
         }
 
-        async function handlePaymentMethodSubmission(event, card) {
+        async function handleChargeAndStoreCardSubmission(
+          event,
+          card,
+          customerId,
+        ) {
           event.preventDefault();
 
           try {
@@ -123,27 +151,49 @@
             cardButton.disabled = true;
             const token = await tokenize(card);
             const paymentResults = await createPayment(token);
-            displayPaymentResults('SUCCESS');
 
             console.debug('Payment Success', paymentResults);
+
+            const storeCardResults = await storeCard(
+              paymentResults.payment.id,
+              customerId,
+            );
+            displayResults('SUCCESS');
+
+            console.debug('Store Card Success', storeCardResults);
           } catch (e) {
             cardButton.disabled = false;
-            displayPaymentResults('FAILURE');
+            displayResults('FAILURE');
             console.error(e.message);
           }
         }
 
         const cardButton = document.getElementById('card-button');
         cardButton.addEventListener('click', async function (event) {
-          await handlePaymentMethodSubmission(event, card);
+          const textInput = document.getElementById('customer-input');
+          if (!textInput.reportValidity()) {
+            return;
+          }
+
+          const customerId = textInput.value;
+          await handleChargeAndStoreCardSubmission(event, card, customerId);
         });
       });
     </script>
   </head>
   <body>
     <form id="payment-form">
+      <input
+        id="customer-input"
+        type="text"
+        aria-required="true"
+        aria-label="Customer ID"
+        required="required"
+        placeholder="Customer ID"
+        name="customerId"
+      />
       <div id="card-container"></div>
-      <button id="card-button" type="button">Pay $1.00</button>
+      <button id="card-button" type="button">Pay £1.00</button>
     </form>
     <div id="payment-status-container"></div>
   </body>
