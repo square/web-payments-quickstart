@@ -38,7 +38,7 @@
     "micro": "9.3.4",
     "microrouter": "^3.1.3",
     "serve-handler": "^6.1.6",
-    "square": "^39.1.1"
+    "square": "^42.2.0"
   },
   "devDependencies": {
     "@square/prettier-config": "^1.0.0",
