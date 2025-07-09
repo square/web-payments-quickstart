@@ -1,4 +1,4 @@
-l<!doctype html>
+<!doctype html>
 <html>
   <head>
     <link href="/app.css" rel="stylesheet" />
@@ -163,6 +163,7 @@ l<!doctype html>
         if (applePay) {
           const applePayButton = document.getElementById('apple-pay-button');
           applePayButton.addEventListener('click', async function (event) {
+            event.preventDefault();
             await handlePaymentMethodSubmission(event, applePay);
           });
         }
