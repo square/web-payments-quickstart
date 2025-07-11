@@ -15,7 +15,7 @@ const {
   validateCreateCardPayload,
 } = require('./server/schema');
 // square provides the API client and error types
-const { ApiError, client: square } = require('./server/square');
+const { SquareError, client: square } = require('./server/square');
 
 async function createPayment(req, res) {
   const payload = await json(req);
