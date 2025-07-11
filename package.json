@@ -12,8 +12,8 @@
     "dev": "micro-dev",
     "lint": "npm-run-all --serial lint:*",
     "lint:eslint": "eslint --ignore-pattern .gitignore --cache .",
-    "lint:prettier": "prettier --ignore-pattern .gitignore --check .",
-    "lint:prettier:fix": "prettier --ignore-pattern .gitignore --write .",
+    "lint:prettier": "prettier --check .",
+    "lint:prettier:fix": "prettier --write .",
     "test": "npm-run-all --serial lint test:*",
     "test:unit": "nyc ava"
   },
