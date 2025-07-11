@@ -55,7 +55,7 @@ async function createPayment(req, res) {
       }
 
       const { result, statusCode } =
-        await square.paymentsApi.createPayment(payment);
+        await square.payments.create(payment);
 
       logger.info('Payment succeeded!', { result, statusCode });
 
