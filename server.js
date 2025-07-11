@@ -54,8 +54,7 @@ async function createPayment(req, res) {
         payment.verificationToken = payload.verificationToken;
       }
 
-      const { result, statusCode } =
-        await square.payments.create(payment);
+      const { result, statusCode } = await square.payments.create(payment);
 
       logger.info('Payment succeeded!', { result, statusCode });
 
