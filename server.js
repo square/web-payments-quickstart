@@ -69,7 +69,7 @@ async function createPayment(req, res) {
         },
       });
     } catch (ex) {
-      if (ex instanceof ApiError) {
+      if (ex instanceof SquareError) {
         // likely an error in the request. don't retry
         logger.error(ex.errors);
         bail(ex);

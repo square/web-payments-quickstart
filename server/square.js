@@ -1,10 +1,10 @@
-const { ApiError, Client, Environment } = require('square');
+const { SquareError, SquareClient, SquareEnvironment } = require('square');
 
 const { isProduction, SQUARE_ACCESS_TOKEN } = require('./config');
 
-const client = new Client({
-  environment: isProduction ? Environment.Production : Environment.Sandbox,
-  accessToken: SQUARE_ACCESS_TOKEN,
+const client = new SquareClient({
+  environment: isProduction ? SquareEnvironment.Production : SquareEnvironment.Sandbox,
+  token: SQUARE_ACCESS_TOKEN,
 });
 
-module.exports = { ApiError, client };
+module.exports = { SquareError, client };
