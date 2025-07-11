@@ -120,7 +120,7 @@ async function storeCard(req, res) {
         card: result.card,
       });
     } catch (ex) {
-      if (ex instanceof ApiError) {
+      if (ex instanceof SquareError) {
         // likely an error in the request. don't retry
         logger.error(ex.errors);
         bail(ex);
