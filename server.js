@@ -15,7 +15,7 @@ const {
   validateCreateCardPayload,
 } = require('./server/schema');
 // square provides the API client and error types
-const { ApiError, client: square } = require('./server/square');
+const { SquareError, client: square } = require('./server/square');
 
 async function createPayment(req, res) {
   const payload = await json(req);
@@ -36,7 +36,7 @@ async function createPayment(req, res) {
         sourceId: payload.sourceId,
         amountMoney: {
           // the expected amount is in cents, meaning this is $1.00.
-          amount: '100',
+          amount: 100n,
           // If you are a non-US account, you must change the currency to match the country in which
           // you are accepting the payment.
           currency: 'USD',
@@ -54,22 +54,21 @@ async function createPayment(req, res) {
         payment.verificationToken = payload.verificationToken;
       }
 
-      const { result, statusCode } =
-        await square.paymentsApi.createPayment(payment);
+      const { payment: paymentResponse } =
+        await square.payments.create(payment);
+      logger.info('Payment succeeded!', { paymentResponse });
 
-      logger.info('Payment succeeded!', { result, statusCode });
-
-      send(res, statusCode, {
+      send(res, 200, {
         success: true,
         payment: {
-          id: result.payment.id,
-          status: result.payment.status,
-          receiptUrl: result.payment.receiptUrl,
-          orderId: result.payment.orderId,
+          id: paymentResponse.id,
+          status: paymentResponse.status,
+          receiptUrl: paymentResponse.receiptUrl,
+          orderId: paymentResponse.orderId,
         },
       });
     } catch (ex) {
-      if (ex instanceof ApiError) {
+      if (ex instanceof SquareError) {
         // likely an error in the request. don't retry
         logger.error(ex.errors);
         bail(ex);
@@ -120,7 +119,7 @@ async function storeCard(req, res) {
         card: result.card,
       });
     } catch (ex) {
-      if (ex instanceof ApiError) {
+      if (ex instanceof SquareError) {
         // likely an error in the request. don't retry
         logger.error(ex.errors);
         bail(ex);
