@@ -33,22 +33,22 @@
   "dependencies": {
     "ajv": "^8.17.1",
     "async-retry": "^1.3.3",
-    "debug": "^4.4.1",
-    "dotenv": "^17.2.1",
+    "debug": "^4.4.3",
+    "dotenv": "^17.2.3",
     "micro": "9.3.4",
     "microrouter": "^3.1.3",
     "serve-handler": "^6.1.6",
-    "square": "^43.0.2"
+    "square": "^43.2.0"
   },
   "devDependencies": {
     "@square/prettier-config": "^1.0.0",
     "ava": "^6.4.1",
-    "eslint": "^9.34.0",
+    "eslint": "^9.38.0",
     "eslint-plugin-ava": "^15.1.0",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-square": "^26.0.1",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.6",
+    "lint-staged": "^16.2.6",
     "micro-dev": "^3.1.0",
     "node-fetch": "^2.7.0",
     "npm-run-all": "^4.1.5",
