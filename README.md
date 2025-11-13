@@ -51,8 +51,6 @@ SQUARE_ACCESS_TOKEN=eX@mpl3_t0k3n
 
 Restart your server to use this new value.
 
-_Remember: Do not add your access tokens to git!_
-
 Each payment method HTML file in `public/examples/` must be configured with your Square credentials.
 
 1. Get your credentials from the [Developer Dashboard](https://developer.squareup.com/apps):
@@ -65,6 +63,8 @@ Each payment method HTML file in `public/examples/` must be configured with your
    const locationId = '{LOCATION_ID}'; // Replace with your Location ID
    ```
 
+_Remember: Do not add your credentials to git!_
+   
 ## Development
 
 ### Setup
