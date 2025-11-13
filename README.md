@@ -62,7 +62,6 @@ Each payment method HTML file in `public/examples/` must be configured with your
    const appId = '{APPLICATION_ID}'; // Replace with your Application ID
    const locationId = '{LOCATION_ID}'; // Replace with your Location ID
    ```
-
 _Remember: Do not add your credentials to git!_
    
 ## Development
