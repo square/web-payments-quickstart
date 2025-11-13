@@ -61,8 +61,8 @@ Each payment method HTML file in `public/examples/` must be configured with your
 
 2. Update the placeholders in each HTML file (e.g., `card-charge.html`, `apple-pay.html`, `google-pay.html`, `ach.html`, etc.)
    ```javascript
-   const appId = '{APPLICATION_ID}';      // Replace with your Application ID
-   const locationId = '{LOCATION_ID}';    // Replace with your Location ID
+   const appId = '{APPLICATION_ID}'; // Replace with your Application ID
+   const locationId = '{LOCATION_ID}'; // Replace with your Location ID
    ```
 
 ## Development
