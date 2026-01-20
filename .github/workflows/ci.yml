@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24' # keep in sync with .nvmrc
 
@@ -25,7 +25,7 @@ jobs:
           echo "::set-output name=dir::$(npm config get cache)"
 
       - name: Cache dependencies
-        uses: actions/cache@v4.2.3
+        uses: actions/cache@v4.3.0
         with:
           path: ${{ steps.npm-cache.outputs.dir}}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}

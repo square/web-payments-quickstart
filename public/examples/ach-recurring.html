@@ -84,24 +84,21 @@
         statusContainer.style.visibility = 'visible';
       }
 
-      function getBillingContact(form) {
-        const formData = new FormData(form);
-        // It is expected that the developer performs form field validation
-        // which does not occur in this example.
-        return {
-          givenName: formData.get('givenName'),
-          familyName: formData.get('familyName'),
-        };
-      }
-
       function getACHOptions(form) {
-        const billingContact = getBillingContact(form);
-        const accountHolderName = `${billingContact.givenName} ${billingContact.familyName}`;
-
         return {
-          accountHolderName,
-          intent: 'CHARGE',
-          amount: '1.00',
+          intent: 'RECURRING_CHARGE',
+          bankAccountId: '{BANK_ACCOUNT_ID}',
+          startDate: '2028-12-31',
+          frequency: {
+            yearly: {
+              occurrence: 1,
+              months: ['JANUARY'],
+              days: {
+                daysOfMonth: [15, 31],
+              },
+            },
+          },
+          amount: '5.00',
           currency: 'USD',
         };
       }
@@ -161,28 +158,6 @@
   </head>
   <body>
     <form id="payment-form">
-      <fieldset class="buyer-inputs">
-        <input
-          type="text"
-          autocomplete="given-name"
-          aria-required="true"
-          aria-label="First Name"
-          required="required"
-          placeholder="Given Name"
-          name="givenName"
-          spellcheck="false"
-        />
-        <input
-          type="text"
-          autocomplete="family-name"
-          aria-required="true"
-          aria-label="Last Name"
-          required="required"
-          placeholder="Family Name"
-          name="familyName"
-          spellcheck="false"
-        />
-      </fieldset>
       <button id="ach-button" type="button">Pay with Bank Account</button>
     </form>
     <div id="payment-status-container"></div>
