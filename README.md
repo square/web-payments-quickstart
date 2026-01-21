@@ -51,7 +51,19 @@ SQUARE_ACCESS_TOKEN=eX@mpl3_t0k3n
 
 Restart your server to use this new value.
 
-_Remember: Do not add your access tokens to git!_
+Each payment method HTML file in `public/examples/` must be configured with your Square credentials.
+
+1. Get your credentials from the [Developer Dashboard](https://developer.squareup.com/apps):
+   - **Application ID**: Found in the Credentials tab (left panel)
+   - **Location ID**: Found in the Locations tab (left panel)
+
+2. Update the placeholders in each HTML file (e.g., `card-charge.html`, `apple-pay.html`, `google-pay.html`, `ach.html`, etc.)
+   ```javascript
+   const appId = '{APPLICATION_ID}'; // Replace with your Application ID
+   const locationId = '{LOCATION_ID}'; // Replace with your Location ID
+   ```
+
+_Remember: Do not add your credentials to git!_
 
 ## Development
 
