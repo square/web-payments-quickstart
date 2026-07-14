@@ -16,7 +16,7 @@
           countryCode: 'US',
           currencyCode: 'USD',
           total: {
-            amount: '1.00',
+            amount: '100.00',
             label: 'Total',
           },
         });
@@ -27,7 +27,7 @@
         const paymentRequest = buildPaymentRequest(payments);
         const cashAppPay = await payments.cashAppPay(paymentRequest, {
           redirectURL: window.location.href,
-          referenceId: 'my-website-00000001',
+          referenceId: 'my-website-00000002',
         });
         const buttonOptions = {
           shape: 'semiround',
@@ -128,7 +128,7 @@
   </head>
   <body>
     <form id="payment-form">
-      <h2>Pay $1.00</h2>
+      <h2>Pay $100.00</h2>
       <div id="cash-app-pay"></div>
     </form>
     <div id="payment-status-container"></div>
